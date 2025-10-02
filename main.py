@@ -63,10 +63,10 @@ def pipeline(
         ocr_output_dir.mkdir(parents=True, exist_ok=True)
         perform_ocr(input_dir_images, ocr_output_dir)
         input_dir_images = ocr_output_dir
-    anon_script = Path(os.getcwd()) / "ctp" / "anon_script"
+    anon_script = Path(os.getcwd()) / "ctp" / "anon.script"
     run_ctp(
         input_dir=input_dir_images,
-        output_dir=output_dir,
+        output_dir=output_dir.absolute(),
         anon_script=anon_script,
         site_id=site_id,
         threads=threads,

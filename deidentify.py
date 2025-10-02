@@ -1,7 +1,23 @@
 import subprocess
 import uuid
+from collections import namedtuple
 from hashlib import sha256
 from pathlib import Path
+
+from loguru import logger
+
+CTPResults = namedtuple("CTPResults", ["elapsed_time", "processed_count"])
+
+
+def _process_ctp_output(lines: list[str]) -> CTPResults:
+    elapsed_time = 0
+    processed_count = 0
+    for line in lines:
+        if line.startswith("Elapsed time:"):
+            elapsed_time = float(line.strip().split(":")[1].strip())
+        elif "Anonymized file" in line:
+            processed_count += 1
+    return CTPResults(elapsed_time, processed_count)
 
 
 def run_ctp(
@@ -45,12 +61,16 @@ def run_ctp(
         "-out",
         str(output_dir.absolute()),
     ]
+    logger.info("Running CTP command, output will be saved to {}".format(output_dir))
     process = subprocess.Popen(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd
     )
     output, err = process.communicate()
-    for line in output.decode("utf-8").splitlines():
-        if line.startswith("Elapsed time:") or "Anonymized file" in line:
-            print(line)
+    results = _process_ctp_output(output.decode("utf-8").splitlines())
     for line in err.decode("utf-8").splitlines():
         print(f"CTP ERROR: {line}")
+    logger.info(
+        "CTP command completed, elapsed time: {} seconds, files anonymized: {}".format(
+            results.elapsed_time, results.processed_count
+        )
+    )

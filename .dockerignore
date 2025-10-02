@@ -6,6 +6,7 @@
 
 ./output
 ./input
+**/*.dcm
 **/.DS_Store
 **/__pycache__
 **/.venv
