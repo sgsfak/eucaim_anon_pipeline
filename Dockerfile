@@ -2,7 +2,7 @@ FROM debian:trixie-slim
 COPY --from=ghcr.io/astral-sh/uv:0.8.22 /uv /uvx /bin/
 
 RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install build-essential tesseract-ocr ffmpeg libsm6 libxext6 default-jdk --no-install-recommends -y \
+    && DEBIAN_FRONTEND=noninteractive apt-get install ccache build-essential tesseract-ocr ffmpeg libsm6 libxext6 default-jdk --no-install-recommends -y \
     && rm -rf /var/lib/apt/lists/* \
     && tesseract -v
 
