@@ -1,0 +1,3 @@
+## EUCAIM Anonymization Pipeline in a Box
+
+A DICOM Anonymization pipeline in a Docker container...

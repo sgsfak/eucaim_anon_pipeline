@@ -1,0 +1,12 @@
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+  build:
+    desc: Build a Docker image
+    cmd: docker build -t eucaim_anon_pipeline .
+
+  run:
+    desc: Run the pipeline in a Docker container
+    cmd: docker run --rm --volume /Users/ssfak/Downloads/dicom_files_deid_burned_info:/input:ro --volume ./output:/output eucaim_anon_pipeline --help
