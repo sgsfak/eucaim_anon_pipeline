@@ -1,5 +1,4 @@
 import subprocess
-import uuid
 from collections import namedtuple
 from hashlib import sha256
 from pathlib import Path
@@ -26,12 +25,11 @@ def run_ctp(
     output_dir: Path,
     anon_script: Path,
     site_id: str,
+    pepper: str,
     threads: int,
 ) -> None:
     # use the folder of the anon.script as the current working directory
     cwd = anon_script.parent
-
-    pepper = uuid.uuid4().hex  # Create a random string for "pepper"
 
     # To make more difficult the identification of the original provider given
     # the contents of the anonymized DICOM files, we hash the "site id" and add
@@ -49,7 +47,7 @@ def run_ctp(
         "-jar",
         "DAT.jar",
         "-n",
-        "4",
+        str(threads),
         "-da",
         str(anon_script),
         "-pPROVIDERID",
