@@ -30,7 +30,10 @@ def hash_patient_id(patient_id: str, site_id: str) -> str:
 
 
 def parse_and_hash_clinical_csv(
-    input_file: Path, output_file: Path, site_id: str
+    input_file: Path,
+    output_file: Path,
+    site_id: str,
+    prefix: str = "EUCAIM-",
 ) -> None:
     """
     Parses a clinical CSV file and hashes the patient IDs using the CTP algorithm.
@@ -38,6 +41,9 @@ def parse_and_hash_clinical_csv(
     Args:
         input_file: The path to the input CSV file.
         output_file: The path to the output CSV file.
+        site_id: The 'site ID' (actually "pepper") to use for hashing.
+        prefix: The prefix to use for the hashed patient IDs, defaults to "EUCAIM-"
+                Note that this should be aligned with the anon.script !!!
 
     Returns:
         None
@@ -55,10 +61,19 @@ def parse_and_hash_clinical_csv(
         reader = clevercsv.reader(fp, dialect)
         rows = list(reader)
 
+        # What will be the CSV dialect used for the output file? We have two sane options:
+        # RFC4180, which is kind of standard, or the dialect used in the input file
+        # I opted for RFC4180 to ensure consistency.
+        # Note: For some reason in CleverCSV the 'excel dialect corresponds to RFC4180!
+        # See https://clevercsv.readthedocs.io/en/latest/source/clevercsv.html#clevercsv.wrappers.write_table
         writer = clevercsv.writer(fp_out, "excel")
+
+        # We assume that the first row in the input file contains the header, so
+        # we write it to the output file as is:
         writer.writerow(rows[0])
 
         for row in rows[1:]:
             hashed_id = hash_patient_id(row[0], site_id)
-            writer.writerow([hashed_id, *row[1:]])
+            new_patient_id = f"{prefix}{hashed_id}"
+            writer.writerow([new_patient_id, *row[1:]])
         logger.info(f"Wrote {len(rows)} rows to {output_file} in RFC4180 CSV format")
