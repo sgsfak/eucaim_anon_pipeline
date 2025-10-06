@@ -11,20 +11,35 @@ from typing_extensions import Annotated
 
 from deidentify import run_ctp
 from hash_clinical import parse_and_hash_clinical_csv
+from paddle_ocr import PresidioPaddleOCR
 
 INPUT_DIR: Path = Path("/input")
 OUTPUT_DIR: Path = Path("/output")
 
 
-def perform_ocr(input_dir: Path, output_dir: Path) -> None:
+def perform_ocr(
+    input_dir: Path,
+    output_dir: Path,
+    paddle_ocr: bool = True,
+) -> None:
     engine = DicomImageRedactorEngine()
+    if paddle_ocr:
+        engine.image_analyzer_engine.ocr = PresidioPaddleOCR(
+            config_file="PaddleOCR.yaml"
+        )
     logger.info("Starting OCR pipeline, output will be saved to {}".format(output_dir))
     for file_path in input_dir.rglob("*.dcm"):
-        dicom_data = pydicom.dcmread(file_path)
-        redacted_data = engine.redact(dicom_data, fill="contrast")
-        output_path = output_dir / file_path.relative_to(input_dir)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        redacted_data.save_as(output_path)
+        output_path_dir = output_dir / file_path.parent.relative_to(input_dir)
+        if not output_path_dir.exists():
+            output_path_dir.mkdir(parents=True, exist_ok=True)
+        engine.redact_from_file(
+            file_path,
+            str(output_path_dir),
+            fill="contrast",
+            use_metadata=True,
+            save_bboxes=False,
+            verbose=False,
+        )
         logger.info(f"Redacted {file_path.relative_to(input_dir)}")
 
 
@@ -47,7 +62,12 @@ def pipeline(
         ),
     ],
     ocr: Annotated[
-        bool, typer.Option(help="Perform OCR and image deidentication")
+        bool,
+        typer.Option(help="Perform OCR (using Tesseract) and image deidentication"),
+    ] = False,
+    paddle_ocr: Annotated[
+        bool,
+        typer.Option(help="Perform OCR using PaddleOCR and image deidentification"),
     ] = False,
     input_dir: Annotated[
         Path,
@@ -72,9 +92,9 @@ def pipeline(
 ):
     pepper = uuid.uuid4().hex  # Create a random string for "pepper"
     input_dir_images = input_dir
-    if ocr:
+    if ocr or paddle_ocr:
         ocr_output_dir = Path(tempfile.mkdtemp())
-        perform_ocr(input_dir_images, ocr_output_dir)
+        perform_ocr(input_dir_images, ocr_output_dir, paddle_ocr)
         input_dir_images = ocr_output_dir
     anon_script = Path(os.getcwd()) / "ctp" / "anon.script"
     run_ctp(
