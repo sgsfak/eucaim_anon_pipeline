@@ -4,11 +4,16 @@ An adapter for using PaddleOCR as the underlying OCR of Presidio.
 
 import numpy as np
 from paddleocr import PaddleOCR
+from paddleocr._constants import DEFAULT_CPU_THREADS
 from PIL.Image import Image
 from presidio_image_redactor import OCR
 
+PADDLE_DEFAULT_CPU_THREADS: int = DEFAULT_CPU_THREADS
 
-def create_ocr(*, num_threads: int = 1, config_file: str | None = None):
+
+def create_ocr(
+    *, num_threads: int = PADDLE_DEFAULT_CPU_THREADS, config_file: str | None = None
+):
     ocr: PaddleOCR = PaddleOCR(
         return_word_box=False,
         use_doc_orientation_classify=False,
@@ -51,8 +56,11 @@ def create_ocr(*, num_threads: int = 1, config_file: str | None = None):
 class PresidioPaddleOCR(OCR):
     """OCR class that performs OCR on a given image."""
 
-    def __init__(self, config_file: str | None = None, num_threads: int = 1):
-        self.ocr_ = create_ocr(config_file=config_file, num_threads=num_threads)
+    def __init__(self, config_file: str | None = None, num_threads: int | None = None):
+        self.ocr_ = create_ocr(
+            config_file=config_file,
+            num_threads=num_threads or PADDLE_DEFAULT_CPU_THREADS,
+        )
 
     def perform_ocr(self, image: object, **kwargs) -> dict:
         """Perform OCR on a given image.

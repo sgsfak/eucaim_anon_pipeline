@@ -1,10 +1,12 @@
 import os
+import sys
 import tempfile
 import time
 import uuid
 from pathlib import Path
 
 import pydicom
+import rich
 import typer
 from loguru import logger
 from presidio_image_redactor import DicomImageRedactorEngine
@@ -13,10 +15,13 @@ from typing_extensions import Annotated
 
 from deidentify import run_ctp
 from hash_clinical import parse_and_hash_clinical_csv
-from paddle_ocr import PresidioPaddleOCR
+from paddle_ocr import PADDLE_DEFAULT_CPU_THREADS, PresidioPaddleOCR
 
 INPUT_DIR: Path = Path("/input")
 OUTPUT_DIR: Path = Path("/output")
+
+
+cli = typer.Typer()
 
 
 def perform_ocr(
@@ -24,7 +29,7 @@ def perform_ocr(
     output_dir: Path,
     paddle_ocr: bool = True,
     verbose: bool = False,
-    threads: int = 1,
+    threads: int = PADDLE_DEFAULT_CPU_THREADS,
 ) -> None:
     engine = DicomImageRedactorEngine()
     if paddle_ocr:
@@ -60,7 +65,7 @@ def perform_ocr(
         )
         cnt += 1
     time_end = time.time()
-    logger.info(f"Redacted {cnt} files in {time_end - time_start} seconds")
+    logger.info(f"Redacted {cnt} files in {time_end - time_start:.3f} seconds")
 
 
 def hash_clinical_if_found(input_dir: Path, output_dir: Path, site_id: str) -> None:
@@ -74,6 +79,7 @@ def hash_clinical_if_found(input_dir: Path, output_dir: Path, site_id: str) -> N
     parse_and_hash_clinical_csv(input_clinical_csv, output_clinical_csv, site_id)
 
 
+@cli.command()
 def pipeline(
     site_id: Annotated[
         str,
@@ -105,15 +111,21 @@ def pipeline(
     threads: Annotated[
         int,
         typer.Option(
-            help="Number of threads that RSNA CTP will use",
+            help="Number of threads that RSNA CTP and PaddleOCR (if enabled) will use",
             show_default=True,
         ),
-    ] = 2,
+    ] = PADDLE_DEFAULT_CPU_THREADS,
     verbose: Annotated[
         bool,
         typer.Option("--verbose", "-v", help="Enable verbose logging"),
     ] = False,
 ):
+    if paddle_ocr and ocr:
+        rich.print(
+            "[red][bold]Error:[/bold] Cannot use both PaddleOCR and TesseractOCR: please choose one, use --help for usage information[/red]"
+        )
+        sys.exit(1)
+
     pepper = uuid.uuid4().hex  # Create a random string for "pepper"
     input_dir_images = input_dir
     if ocr or paddle_ocr:
@@ -133,4 +145,4 @@ def pipeline(
 
 
 if __name__ == "__main__":
-    typer.run(pipeline)
+    cli(prog_name="pipeline")
