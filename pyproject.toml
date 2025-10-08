@@ -1,7 +1,7 @@
 [project]
 name = "anonymize-pipeline"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.8.2"
+description = "A DICOM Anonymization pipeline in a Docker container"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
