@@ -15,7 +15,7 @@ docker pull ghcr.io/sgsfak/eucaim_anon_pipeline
 ```
 
 
-Then you can run the pipeline using the following command, which shows the barely minimum information required to run the pipeline:
+Then you can run the pipeline using the following command, which shows the bare minimum information required to run the pipeline:
 
 ```
 docker run -v <INPUT-DIR>:/input -v <OUTPUT-DIR>:/output ghcr.io/sgsfak/eucaim_anon_pipeline <SITE-ID>

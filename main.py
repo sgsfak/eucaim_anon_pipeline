@@ -21,7 +21,7 @@ INPUT_DIR: Path = Path("/input")
 OUTPUT_DIR: Path = Path("/output")
 
 
-cli = typer.Typer()
+cli = typer.Typer(add_completion=False)
 
 
 def perform_ocr(
