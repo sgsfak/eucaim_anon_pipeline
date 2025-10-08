@@ -6,19 +6,34 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && tesseract -v
 
-# Copy the project into the image
-ADD . /app
-
-# Sync the project into a new environment, asserting the lockfile is up to date
 WORKDIR /app
-RUN uv sync --frozen
 
-RUN uv run python -m ensurepip
+# Download dependencies as a separate step to take advantage of Docker's caching.
+# Leverage a cache mount to /root/.cache/uv to speed up subsequent builds.
 
+# Copy the lockfile and `pyproject.toml` into the image
+COPY uv.lock pyproject.toml .python-version /app/
+ENV UV_CACHE_DIR=/root/.cache/uv
+ENV UV_LINK_MODE=copy
+ENV UV_COMPILE_BYTECODE=1
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-install-project --no-dev
+
+ENV PATH=/app/.venv/bin:$PATH
+
+RUN uv pip install pip
 RUN uv run python -m spacy download en_core_web_lg
 
-COPY . /app
-WORKDIR /app
+# Copy the project into the image
+COPY . .
+
+## Bootstrap PaddleOCR to include the configured models:
+RUN uv run python -c 'from paddle_ocr import PresidioPaddleOCR; PresidioPaddleOCR(config_file="PaddleOCR.yaml")'
+
+# RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev
+
+# Keeps Python from buffering stdout and stderr to avoid situations where
+# the application crashes without emitting any logs due to buffering.
+ENV PYTHONUNBUFFERED=1
 
 # Run the application
-ENTRYPOINT ["/bin/uv", "run", "python", "main.py"]
+ENTRYPOINT ["uv", "run", "python", "main.py"]
