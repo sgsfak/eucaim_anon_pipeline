@@ -89,11 +89,16 @@ def pipeline(
     ],
     ocr: Annotated[
         bool,
-        typer.Option(help="Perform OCR (using Tesseract) and image deidentication"),
+        typer.Option(
+            "--ocr", help="Perform OCR (using Tesseract) and image deidentication"
+        ),
     ] = False,
     paddle_ocr: Annotated[
         bool,
-        typer.Option(help="Perform OCR using PaddleOCR and image deidentification"),
+        typer.Option(
+            "--paddle-ocr",
+            help="Perform OCR using PaddleOCR and image deidentification",
+        ),
     ] = False,
     input_dir: Annotated[
         Path,
