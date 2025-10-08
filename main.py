@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 import uuid
 from pathlib import Path
 
@@ -7,6 +8,7 @@ import pydicom
 import typer
 from loguru import logger
 from presidio_image_redactor import DicomImageRedactorEngine
+from tqdm import tqdm
 from typing_extensions import Annotated
 
 from deidentify import run_ctp
@@ -21,17 +23,33 @@ def perform_ocr(
     input_dir: Path,
     output_dir: Path,
     paddle_ocr: bool = True,
+    verbose: bool = False,
+    threads: int = 1,
 ) -> None:
     engine = DicomImageRedactorEngine()
     if paddle_ocr:
         engine.image_analyzer_engine.ocr = PresidioPaddleOCR(
-            config_file="PaddleOCR.yaml"
+            config_file="PaddleOCR.yaml",
+            num_threads=threads,
         )
     logger.info("Starting OCR pipeline, output will be saved to {}".format(output_dir))
-    for file_path in input_dir.rglob("*.dcm"):
+    cnt = 0
+    files_to_process = input_dir.rglob("*")
+    files_with_progress = files_to_process if verbose else tqdm(files_to_process)
+    time_start = time.time()
+    for file_path in files_with_progress:
+        if not file_path.is_file():
+            continue
+        is_dicom: bool = False
+        with open(file_path, "rb") as f:
+            is_dicom = f.seek(128) == 128 and f.read(4) == b"DICM"
+        if not is_dicom:
+            continue
         output_path_dir = output_dir / file_path.parent.relative_to(input_dir)
         if not output_path_dir.exists():
             output_path_dir.mkdir(parents=True, exist_ok=True)
+        if verbose:
+            logger.info(f"OCR processing file {file_path}")
         engine.redact_from_file(
             file_path,
             str(output_path_dir),
@@ -40,7 +58,9 @@ def perform_ocr(
             save_bboxes=False,
             verbose=False,
         )
-        logger.info(f"Redacted {file_path.relative_to(input_dir)}")
+        cnt += 1
+    time_end = time.time()
+    logger.info(f"Redacted {cnt} files in {time_end - time_start} seconds")
 
 
 def hash_clinical_if_found(input_dir: Path, output_dir: Path, site_id: str) -> None:
@@ -89,12 +109,16 @@ def pipeline(
             show_default=True,
         ),
     ] = 2,
+    verbose: Annotated[
+        bool,
+        typer.Option("--verbose", "-v", help="Enable verbose logging"),
+    ] = False,
 ):
     pepper = uuid.uuid4().hex  # Create a random string for "pepper"
     input_dir_images = input_dir
     if ocr or paddle_ocr:
         ocr_output_dir = Path(tempfile.mkdtemp())
-        perform_ocr(input_dir_images, ocr_output_dir, paddle_ocr)
+        perform_ocr(input_dir_images, ocr_output_dir, paddle_ocr, verbose, threads)
         input_dir_images = ocr_output_dir
     anon_script = Path(os.getcwd()) / "ctp" / "anon.script"
     run_ctp(

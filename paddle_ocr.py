@@ -8,12 +8,13 @@ from PIL.Image import Image
 from presidio_image_redactor import OCR
 
 
-def create_ocr(config_file: str | None = None):
+def create_ocr(*, num_threads: int = 1, config_file: str | None = None):
     ocr: PaddleOCR = PaddleOCR(
         return_word_box=False,
         use_doc_orientation_classify=False,
         use_doc_unwarping=False,
         use_textline_orientation=False,
+        cpu_threads=num_threads,
         paddlex_config=config_file,
     )
 
@@ -50,8 +51,8 @@ def create_ocr(config_file: str | None = None):
 class PresidioPaddleOCR(OCR):
     """OCR class that performs OCR on a given image."""
 
-    def __init__(self, config_file: str | None = None):
-        self.ocr_ = create_ocr(config_file)
+    def __init__(self, config_file: str | None = None, num_threads: int = 1):
+        self.ocr_ = create_ocr(config_file=config_file, num_threads=num_threads)
 
     def perform_ocr(self, image: object, **kwargs) -> dict:
         """Perform OCR on a given image.

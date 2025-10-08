@@ -53,6 +53,7 @@ dependencies = [
     { name = "presidio-anonymizer" },
     { name = "presidio-image-redactor" },
     { name = "pydicom" },
+    { name = "tqdm" },
     { name = "typer-slim" },
 ]
 
@@ -73,6 +74,7 @@ requires-dist = [
     { name = "presidio-anonymizer", specifier = ">=2.2.360" },
     { name = "presidio-image-redactor", specifier = ">=0.0.57" },
     { name = "pydicom", specifier = ">=3.0.1" },
+    { name = "tqdm", specifier = ">=4.67.1" },
     { name = "typer-slim", specifier = ">=0.19.2" },
 ]
 
