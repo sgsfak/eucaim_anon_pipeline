@@ -1,5 +1,5 @@
 FROM debian:trixie-slim
-COPY --from=ghcr.io/astral-sh/uv:0.8.22 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.9.3 /uv /uvx /bin/
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install ccache build-essential tesseract-ocr ffmpeg libsm6 libxext6 default-jdk --no-install-recommends -y \
@@ -20,12 +20,13 @@ RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-install-proj
 
 ENV PATH=/app/.venv/bin:$PATH
 
-RUN uv pip install pip
-RUN uv run python -m spacy download en_core_web_lg
 
 # Copy the project into the image
-COPY PaddleOCR.yaml src/ /app/
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev
 
+RUN uv pip install pip
+RUN uv run python -m spacy download en_core_web_lg
 ## Bootstrap PaddleOCR to include the configured models:
 RUN uv run python -c 'from anon_pipeline.paddle_ocr import PresidioPaddleOCR; PresidioPaddleOCR(config_file="PaddleOCR.yaml")'
 
