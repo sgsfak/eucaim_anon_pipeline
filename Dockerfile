@@ -24,10 +24,10 @@ RUN uv pip install pip
 RUN uv run python -m spacy download en_core_web_lg
 
 # Copy the project into the image
-COPY . .
+COPY PaddleOCR.yaml src/ /app/
 
 ## Bootstrap PaddleOCR to include the configured models:
-RUN uv run python -c 'from paddle_ocr import PresidioPaddleOCR; PresidioPaddleOCR(config_file="PaddleOCR.yaml")'
+RUN uv run python -c 'from anon_pipeline.paddle_ocr import PresidioPaddleOCR; PresidioPaddleOCR(config_file="PaddleOCR.yaml")'
 
 # RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev
 
@@ -36,4 +36,4 @@ RUN uv run python -c 'from paddle_ocr import PresidioPaddleOCR; PresidioPaddleOC
 ENV PYTHONUNBUFFERED=1
 
 # Run the application
-ENTRYPOINT ["uv", "run", "python", "main.py"]
+ENTRYPOINT ["uv", "run", "-m", "anon_pipeline"]

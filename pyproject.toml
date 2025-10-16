@@ -1,5 +1,5 @@
 [project]
-name = "anonymize-pipeline"
+name = "anon-pipeline"
 version = "0.8.2"
 description = "A DICOM Anonymization pipeline in a Docker container"
 readme = "README.md"
@@ -23,3 +23,7 @@ dependencies = [
 dev = [
     "ipython>=9.6.0",
 ]
+
+[build-system]
+requires = ["uv_build>=0.9.3,<0.10.0"]
+build-backend = "uv_build"
