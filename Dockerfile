@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.19.0
 FROM debian:trixie-slim
 COPY --from=ghcr.io/astral-sh/uv:0.9.3 /uv /uvx /bin/
 
@@ -13,28 +14,25 @@ WORKDIR /app
 
 # Copy the lockfile and `pyproject.toml` into the image
 COPY uv.lock pyproject.toml .python-version /app/
+
 ENV UV_CACHE_DIR=/root/.cache/uv
 ENV UV_LINK_MODE=copy
 ENV UV_COMPILE_BYTECODE=1
-RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-install-project --no-dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project --no-dev --no-editable
 
 ENV PATH=/app/.venv/bin:$PATH
-
-
-# Copy the project into the image
-COPY . .
-RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev
-
-RUN uv pip install pip
-RUN uv run python -m spacy download en_core_web_lg
-## Bootstrap PaddleOCR to include the configured models:
-RUN uv run python -c 'from anon_pipeline.paddle_ocr import PresidioPaddleOCR; PresidioPaddleOCR(config_file="PaddleOCR.yaml")'
-
-# RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-dev
-
 # Keeps Python from buffering stdout and stderr to avoid situations where
 # the application crashes without emitting any logs due to buffering.
 ENV PYTHONUNBUFFERED=1
 
+# Copy the project into the image
+COPY . /app
+
+## Bootstrap PaddleOCR to include the configured models:
+RUN uv run python -c 'from anon_pipeline.paddle_ocr import PresidioPaddleOCR; PresidioPaddleOCR(config_file="PaddleOCR.yaml")'
+
 # Run the application
-ENTRYPOINT ["uv", "run", "-m", "anon_pipeline"]
+ENTRYPOINT ["python", "-m", "anon_pipeline"]

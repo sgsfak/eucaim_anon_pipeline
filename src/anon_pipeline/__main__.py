@@ -16,6 +16,7 @@ from typing_extensions import Annotated
 from .dcm_deidentify import run_ctp
 from .hash_clinical import parse_and_hash_clinical_csv
 from .ocr_deidentify import PADDLE_DEFAULT_CPU_THREADS, perform_ocr
+from .output_dir import copy_and_organize
 
 INPUT_DIR: Path = Path("/input")
 OUTPUT_DIR: Path = Path("/output")
@@ -43,19 +44,6 @@ def pipeline(
             help="The SITE-ID provided by the EUCAIM Technical team",
         ),
     ],
-    ocr: Annotated[
-        bool,
-        typer.Option(
-            "--ocr", help="Perform OCR (using Tesseract) and image deidentication"
-        ),
-    ] = False,
-    paddle_ocr: Annotated[
-        bool,
-        typer.Option(
-            "--paddle-ocr",
-            help="Perform OCR using PaddleOCR and image deidentification",
-        ),
-    ] = False,
     input_dir: Annotated[
         Path,
         typer.Argument(
@@ -69,6 +57,19 @@ def pipeline(
             show_default=True,
         ),
     ] = OUTPUT_DIR,
+    ocr: Annotated[
+        bool,
+        typer.Option(
+            "--ocr", help="Perform OCR (using Tesseract) and image deidentication"
+        ),
+    ] = False,
+    paddle_ocr: Annotated[
+        bool,
+        typer.Option(
+            "--paddle-ocr",
+            help="Perform OCR using PaddleOCR and image deidentification",
+        ),
+    ] = False,
     threads: Annotated[
         int,
         typer.Option(
@@ -76,6 +77,13 @@ def pipeline(
             show_default=True,
         ),
     ] = PADDLE_DEFAULT_CPU_THREADS,
+    hierarchical: Annotated[
+        bool,
+        typer.Option(
+            "--hierarchical/--no-hierarchical",
+            help="Output files will be organized into a hierarchical Patient / Study / Series folder structure using the UIDs as the folder names",
+        ),
+    ] = True,
     verbose: Annotated[
         bool,
         typer.Option("--verbose", "-v", help="Enable verbose logging"),
@@ -94,15 +102,18 @@ def pipeline(
         perform_ocr(input_dir_images, ocr_output_dir, paddle_ocr, verbose, threads)
         input_dir_images = ocr_output_dir
     anon_script = Path(os.getcwd()) / "ctp" / "anon.script"
+    ctp_output_dir = Path(tempfile.mkdtemp()) if hierarchical else output_dir.absolute()
     run_ctp(
         input_dir=input_dir_images,
-        output_dir=output_dir.absolute(),
+        output_dir=ctp_output_dir,
         anon_script=anon_script,
         site_id=site_id,
         pepper=pepper,
         threads=threads,
     )
-    hash_clinical_if_found(input_dir, output_dir, pepper)
+    hash_clinical_if_found(input_dir, ctp_output_dir, pepper)
+    if hierarchical:
+        copy_and_organize(ctp_output_dir, output_dir)
 
 
 if __name__ == "__main__":
