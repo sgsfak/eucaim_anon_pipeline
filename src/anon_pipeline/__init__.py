@@ -1,3 +1,1 @@
-from importlib.metadata import version
-
-__version__ = version("anon_pipeline")
+from .version import __version__

@@ -12,12 +12,19 @@ from .dcm_deidentify import run_ctp
 from .hash_clinical import hash_clinical_csvs
 from .ocr_deidentify import PADDLE_DEFAULT_CPU_THREADS, perform_ocr
 from .output_dir import copy_and_organize
+from .version import __version__
 
 INPUT_DIR: Path = Path("/input")
 OUTPUT_DIR: Path = Path("/output")
 
 
 cli = typer.Typer(add_completion=False)
+
+
+def version_callback(value: bool):
+    if value:
+        print(f"Version: {__version__}")
+        raise typer.Exit()
 
 
 @cli.command()
@@ -76,6 +83,16 @@ def pipeline(
         bool,
         typer.Option("--verbose", "-v", help="Enable verbose logging"),
     ] = False,
+    version: Annotated[
+        bool | None,
+        typer.Option(
+            "--version",
+            "-V",
+            callback=version_callback,
+            is_eager=True,
+            help="Print version information",
+        ),
+    ] = None,
 ):
     if paddle_ocr and ocr:
         rich.print(
@@ -112,4 +129,4 @@ def pipeline(
 
 
 if __name__ == "__main__":
-    cli(prog_name="pipeline")
+    cli(prog_name="anon_pipeline")
