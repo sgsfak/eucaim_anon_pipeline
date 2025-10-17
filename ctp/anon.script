@@ -108,7 +108,7 @@
  <e en="T" n="PrivateDataElementDefinitionSeq" t="00080310">@remove()</e>
  <e en="T" n="NetworkIDRetired" t="00081000">@remove()</e>
  <e en="T" n="StationName" t="00081010">@remove()</e>
- <e en="T" n="StudyDescription" t="00081030">@keep()</e>
+ <e en="T" n="StudyDescription" t="00081030">@remove()</e>
  <e en="T" n="ProcedureCodeSeq" t="00081032">@keep()</e>
  <e en="T" n="SeriesDescription" t="0008103E">@keep()</e>
  <e en="T" n="SeriesDescriptionCodeSeq" t="0008103F">@keep()</e>
