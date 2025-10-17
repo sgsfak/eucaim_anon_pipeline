@@ -1,20 +1,15 @@
 import os
 import sys
 import tempfile
-import time
 import uuid
 from pathlib import Path
 
-import pydicom
 import rich
 import typer
-from loguru import logger
-from presidio_image_redactor import DicomImageRedactorEngine
-from tqdm import tqdm
 from typing_extensions import Annotated
 
 from .dcm_deidentify import run_ctp
-from .hash_clinical import parse_and_hash_clinical_csv
+from .hash_clinical import hash_clinical_csvs
 from .ocr_deidentify import PADDLE_DEFAULT_CPU_THREADS, perform_ocr
 from .output_dir import copy_and_organize
 
@@ -23,17 +18,6 @@ OUTPUT_DIR: Path = Path("/output")
 
 
 cli = typer.Typer(add_completion=False)
-
-
-def hash_clinical_if_found(input_dir: Path, output_dir: Path, site_id: str) -> None:
-    # check if there's a CSV in the input folder:
-    csvs = list(c for c in input_dir.glob("*.csv") if c.is_file())
-    if not csvs:
-        logger.warning("No CSV found in input directory")
-        return
-    input_clinical_csv = csvs[0]
-    output_clinical_csv = output_dir / input_clinical_csv.name
-    parse_and_hash_clinical_csv(input_clinical_csv, output_clinical_csv, site_id)
 
 
 @cli.command()
@@ -81,7 +65,11 @@ def pipeline(
         bool,
         typer.Option(
             "--hierarchical/--no-hierarchical",
-            help="Output files will be organized into a hierarchical Patient / Study / Series folder structure using the UIDs as the folder names",
+            help=(
+                "Output files will be organized into a hierarchical "
+                "Patient / Study / Series folder structure using the anonymized UIDs "
+                "as the folder names"
+            ),
         ),
     ] = True,
     verbose: Annotated[
@@ -96,11 +84,15 @@ def pipeline(
         sys.exit(1)
 
     pepper = uuid.uuid4().hex  # Create a random string for "pepper"
+
+    # Step 1: Run OCR if enabled
     input_dir_images = input_dir
     if ocr or paddle_ocr:
         ocr_output_dir = Path(tempfile.mkdtemp())
         perform_ocr(input_dir_images, ocr_output_dir, paddle_ocr, verbose, threads)
         input_dir_images = ocr_output_dir
+
+    # Step 2: Run RSNA CTP
     anon_script = Path(os.getcwd()) / "ctp" / "anon.script"
     ctp_output_dir = Path(tempfile.mkdtemp()) if hierarchical else output_dir.absolute()
     run_ctp(
@@ -111,9 +103,12 @@ def pipeline(
         pepper=pepper,
         threads=threads,
     )
-    hash_clinical_if_found(input_dir, ctp_output_dir, pepper)
+    # Step 2.1: Copy and organize files if hierarchical
     if hierarchical:
         copy_and_organize(ctp_output_dir, output_dir)
+
+    # Step 3: Hash any clinical CSVs found in the input directory:
+    hash_clinical_csvs(input_dir, output_dir, site_id=pepper, ignore_prefix="_")
 
 
 if __name__ == "__main__":

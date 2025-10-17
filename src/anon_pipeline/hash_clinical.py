@@ -1,3 +1,4 @@
+import shutil
 from hashlib import md5
 from pathlib import Path
 
@@ -29,7 +30,7 @@ def hash_patient_id(patient_id: str, site_id: str) -> str:
     return str(int.from_bytes(h, byteorder="big"))
 
 
-def parse_and_hash_clinical_csv(
+def _parse_and_hash_clinical_csv(
     input_file: Path,
     output_file: Path,
     site_id: str,
@@ -77,3 +78,41 @@ def parse_and_hash_clinical_csv(
             new_patient_id = f"{prefix}{hashed_id}"
             writer.writerow([new_patient_id, *row[1:]])
         logger.info(f"Wrote {len(rows)} rows to {output_file} in RFC4180 CSV format")
+
+
+def hash_clinical_csvs(
+    input_dir: Path,
+    output_dir: Path,
+    *,
+    site_id: str,
+    ignore_prefix: str = "_",
+) -> None:
+    """
+    Checks the input_dir and finds the clinical CSV files in it. Then, for each file,
+    it parses and hashes the patient IDs. It only checks files with the ".csv" extension
+    located directly in the input directory (it does not search in subdirectories), and
+    skips files that start with the given `ignore_prefix`. Any csv file with a name that
+    starts with the given `ignore_prefix` is just copied to the output directory.
+    """
+    csvs = list(c for c in input_dir.glob("*.csv") if c.is_file())
+    if not csvs:
+        logger.warning("No CSV found in input directory")
+        return
+
+    csvs_to_copied = []
+    csvs_to_be_hashed = []
+    for csv in csvs:
+        if csv.name.startswith(ignore_prefix):
+            csvs_to_copied.append(csv)
+        else:
+            csvs_to_be_hashed.append(csv)
+    logger.info(
+        f"Found {len(csvs_to_be_hashed)} CSV file(s) in {input_dir} to be hashed "
+        f"and {len(csvs_to_copied)} CSV file(s) to be copied"
+    )
+    for input_clinical_csv in csvs_to_be_hashed:
+        output_clinical_csv = output_dir / input_clinical_csv.name
+        _parse_and_hash_clinical_csv(input_clinical_csv, output_clinical_csv, site_id)
+    for csv in csvs_to_copied:
+        output_csv = output_dir / csv.name
+        shutil.copy(csv, output_csv)

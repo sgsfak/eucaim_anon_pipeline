@@ -7,7 +7,7 @@ import os
 import shutil
 from collections import namedtuple
 from pathlib import Path
-from typing import Generator, Tuple
+from typing import Generator
 
 from loguru import logger
 from pydicom import FileDataset, dcmread
@@ -30,7 +30,7 @@ def _dcm_generator(input_folder: Path | str) -> Generator[_DcmFileInfo, None, No
                     ds.SeriesInstanceUID,
                     ds.InstanceNumber,
                 )
-            except Exception as e:
+            except Exception:
                 continue
 
 

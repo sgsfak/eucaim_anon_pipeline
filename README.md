@@ -3,7 +3,7 @@
 A DICOM Anonymization pipeline in a Docker container. This pipeline is designed to anonymize DICOM files according to the EUCAIM standard and includes the following steps:
 - **Step 1 (Optional):** Perform OCR on DICOM pixel data to remove sensitive information (burned-in information).
 - **Step 2:** Deidentify DICOM metadata using the RSNA CTP Anonymizer and the [EUCAIM anonymization script](ctp/anon.script).
-- **Step 3 (Optional):** Deidentify clinical data provided in a CSV file so that the referenced patient id is anonymized the same way CTP does in Step 2.
+- **Step 3 (Optional):** Deidentify clinical data provided in CSV files so that the referenced patient id is anonymized the same way CTP does in Step 2.
 
 
 ### Usage
@@ -62,8 +62,9 @@ Usage: pipeline [OPTIONS] SITE_ID [INPUT_DIR] [OUTPUT_DIR]
 │                                                   organized into a           │
 │                                                   hierarchical Patient /     │
 │                                                   Study / Series folder      │
-│                                                   structure using the UIDs   │
-│                                                   as the folder names        │
+│                                                   structure using the        │
+│                                                   anonymized UIDs as the     │
+│                                                   folder names               │
 │                                                   [default: hierarchical]    │
 │ --verbose       -v                                Enable verbose logging     │
 │ --help                                            Show this message and      │
@@ -83,10 +84,14 @@ docker run -v <INPUT-DIR>:/input -v <OUTPUT-DIR>:/output -v <PADDLEOCR_YAML_FILE
 ```
 
 ### Clinical data
-In case there are additional (clinical) data for the patients for which the anonymization is performed, it is recommended to provide the data in a CSV file in the same input directory that contains the DICOM files. This is needed so that the patient ids mentioned in the CSV file are replaced with anonymized patient ids so that they are consistent with the anonymized DICOM files.
+In case there are additional (clinical) data for the patients for which the anonymization is performed, it is recommended to provide the data in one or more CSV files in the same input directory that contains the DICOM files. This is needed so that the patient ids mentioned in the CSV file are replaced with anonymized patient ids so that they are consistent with the anonymized DICOM files.
 
-There are not specific requirements for the name of the CSV file, it can be anything, but it should have a `.csv` extension. Regarding the actual format of the CSV please keep note of the following:
+> **Note:** The CSVs should have a `.csv` file extension and be located directly in the input directory, not in a subdirectory!
+
+In order to accomodate cases where the clinical data have been exported to multiple CSV files, the pipeline will automatically process **all** CSV files found in the input directory **except** those that start with the prefix `_` (undescore). So a CSV with file name `clinical_data.csv` will be processed (hashed, as explained below), whereas a CSV with file name `_clinical_data.csv` will be just copied verbatim to the output directory.
+
+The CSVs to the processed (hashed) are assumed to have the following format:
 * The first line of the file is assumed to be a header line containing the column names
 * The first column should contain the patientID
 
-You can see an example input CSV [here](example_clinical.csv)
+You can see an example input CSV of this format [here](example_clinical.csv)
