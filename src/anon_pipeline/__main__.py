@@ -1,6 +1,7 @@
 import os
 import sys
 import tempfile
+import textwrap
 import uuid
 from pathlib import Path
 
@@ -23,7 +24,17 @@ cli = typer.Typer(add_completion=False)
 
 def version_callback(value: bool):
     if value:
-        print(f"Version: {__version__}")
+        print(
+            textwrap.dedent(f"""
+            ██╗     ███████╗████████╗██╗  ██╗███████╗
+            ██║     ██╔════╝╚══██╔══╝██║  ██║██╔════╝
+            ██║     █████╗     ██║   ███████║█████╗
+            ██║     ██╔══╝     ██║   ██╔══██║██╔══╝
+            ███████╗███████╗   ██║   ██║  ██║███████╗
+            ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
+            Version: {__version__}
+            """)
+        )
         raise typer.Exit()
 
 

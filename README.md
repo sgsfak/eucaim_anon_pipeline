@@ -67,6 +67,7 @@ Usage: pipeline [OPTIONS] SITE_ID [INPUT_DIR] [OUTPUT_DIR]
 │                                                   folder names               │
 │                                                   [default: hierarchical]    │
 │ --verbose       -v                                Enable verbose logging     │
+│ --version       -V                                Print version information  │
 │ --help                                            Show this message and      │
 │                                                   exit.                      │
 ╰──────────────────────────────────────────────────────────────────────────────╯

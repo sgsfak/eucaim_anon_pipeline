@@ -40,7 +40,7 @@ wheels = [
 
 [[package]]
 name = "anon-pipeline"
-version = "0.9.5"
+version = "0.9.6.dev1"
 source = { editable = "." }
 dependencies = [
     { name = "clevercsv" },
