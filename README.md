@@ -1,4 +1,14 @@
-## EUCAIM Anonymization Pipeline in a Box
+```
+
+                         ██╗     ███████╗████████╗██╗  ██╗███████╗
+                         ██║     ██╔════╝╚══██╔══╝██║  ██║██╔════╝
+                         ██║     █████╗     ██║   ███████║█████╗
+                         ██║     ██╔══╝     ██║   ██╔══██║██╔══╝
+                         ███████╗███████╗   ██║   ██║  ██║███████╗
+                         ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
+```
+
+## DICOM Anonymization Pipeline in a Box
 
 A DICOM Anonymization pipeline in a Docker container. This pipeline is designed to anonymize DICOM files according to the EUCAIM standard and includes the following steps:
 - **Step 1 (Optional):** Perform OCR on DICOM pixel data to remove sensitive information (burned-in information).
@@ -35,7 +45,7 @@ docker run ghcr.io/sgsfak/eucaim_anon_pipeline --help
 which should return the following:
 
 ```
-Usage: pipeline [OPTIONS] SITE_ID [INPUT_DIR] [OUTPUT_DIR]
+Usage: lethe [OPTIONS] SITE_ID [INPUT_DIR] [OUTPUT_DIR]
 
 ╭─ Arguments ──────────────────────────────────────────────────────────────────╮
 │ *    site_id         TEXT          The SITE-ID provided by the EUCAIM        │
@@ -67,7 +77,6 @@ Usage: pipeline [OPTIONS] SITE_ID [INPUT_DIR] [OUTPUT_DIR]
 │                                                   folder names               │
 │                                                   [default: hierarchical]    │
 │ --verbose       -v                                Enable verbose logging     │
-│ --version       -V                                Print version information  │
 │ --help                                            Show this message and      │
 │                                                   exit.                      │
 ╰──────────────────────────────────────────────────────────────────────────────╯

@@ -140,4 +140,4 @@ def pipeline(
 
 
 if __name__ == "__main__":
-    cli(prog_name="anon_pipeline")
+    cli(prog_name="lethe")

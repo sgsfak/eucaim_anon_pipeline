@@ -32,7 +32,7 @@ ENV PYTHONUNBUFFERED=1
 COPY . /app
 
 ## Bootstrap PaddleOCR to include the configured models:
-RUN uv run python -c 'from anon_pipeline.paddle_ocr import PresidioPaddleOCR; PresidioPaddleOCR(config_file="PaddleOCR.yaml")'
+RUN uv run python -c 'from lethe.paddle_ocr import PresidioPaddleOCR; PresidioPaddleOCR(config_file="PaddleOCR.yaml")'
 
 # Run the application
-ENTRYPOINT ["python", "-m", "anon_pipeline"]
+ENTRYPOINT ["python", "-m", "lethe"]

@@ -1,5 +1,5 @@
 [project]
-name = "anon-pipeline"
+name = "lethe"
 version = "0.9.6.dev1"
 description = "A DICOM Anonymization pipeline in a Docker container"
 readme = "README.md"

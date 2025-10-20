@@ -39,51 +39,6 @@ wheels = [
 ]
 
 [[package]]
-name = "anon-pipeline"
-version = "0.9.6.dev1"
-source = { editable = "." }
-dependencies = [
-    { name = "clevercsv" },
-    { name = "en-core-web-lg" },
-    { name = "loguru" },
-    { name = "matplotlib" },
-    { name = "opencv-contrib-python-headless" },
-    { name = "paddleocr" },
-    { name = "paddlepaddle" },
-    { name = "presidio-analyzer" },
-    { name = "presidio-anonymizer" },
-    { name = "presidio-image-redactor" },
-    { name = "pydicom" },
-    { name = "tqdm" },
-    { name = "typer-slim" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "ipython" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "clevercsv", specifier = ">=0.8.3" },
-    { name = "en-core-web-lg", url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl" },
-    { name = "loguru", specifier = ">=0.7.3" },
-    { name = "matplotlib", specifier = ">=3.10.6" },
-    { name = "opencv-contrib-python-headless", specifier = ">=4.12.0.88" },
-    { name = "paddleocr", specifier = ">=3.2.0" },
-    { name = "paddlepaddle", specifier = "==3.0.0" },
-    { name = "presidio-analyzer", specifier = ">=2.2.360" },
-    { name = "presidio-anonymizer", specifier = ">=2.2.360" },
-    { name = "presidio-image-redactor", specifier = ">=0.0.57" },
-    { name = "pydicom", specifier = ">=3.0.1" },
-    { name = "tqdm", specifier = ">=4.67.1" },
-    { name = "typer-slim", specifier = ">=0.19.2" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "ipython", specifier = ">=9.6.0" }]
-
-[[package]]
 name = "anyio"
 version = "4.11.0"
 source = { registry = "https://pypi.org/simple" }
@@ -973,6 +928,51 @@ sdist = { url = "https://files.pythonhosted.org/packages/dd/ce/3f144716a9f2cbf42
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5d/e9/5a5ffd9b286db82be70d677d0a91e4d58f7912bb8dd026ddeeb4abe70679/language_data-1.3.0-py3-none-any.whl", hash = "sha256:e2ee943551b5ae5f89cd0e801d1fc3835bb0ef5b7e9c3a4e8e17b2b214548fbf", size = 5385760, upload-time = "2024-11-19T10:21:36.005Z" },
 ]
+
+[[package]]
+name = "lethe"
+version = "0.9.6.dev1"
+source = { editable = "." }
+dependencies = [
+    { name = "clevercsv" },
+    { name = "en-core-web-lg" },
+    { name = "loguru" },
+    { name = "matplotlib" },
+    { name = "opencv-contrib-python-headless" },
+    { name = "paddleocr" },
+    { name = "paddlepaddle" },
+    { name = "presidio-analyzer" },
+    { name = "presidio-anonymizer" },
+    { name = "presidio-image-redactor" },
+    { name = "pydicom" },
+    { name = "tqdm" },
+    { name = "typer-slim" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "ipython" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "clevercsv", specifier = ">=0.8.3" },
+    { name = "en-core-web-lg", url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl" },
+    { name = "loguru", specifier = ">=0.7.3" },
+    { name = "matplotlib", specifier = ">=3.10.6" },
+    { name = "opencv-contrib-python-headless", specifier = ">=4.12.0.88" },
+    { name = "paddleocr", specifier = ">=3.2.0" },
+    { name = "paddlepaddle", specifier = "==3.0.0" },
+    { name = "presidio-analyzer", specifier = ">=2.2.360" },
+    { name = "presidio-anonymizer", specifier = ">=2.2.360" },
+    { name = "presidio-image-redactor", specifier = ">=0.0.57" },
+    { name = "pydicom", specifier = ">=3.0.1" },
+    { name = "tqdm", specifier = ">=4.67.1" },
+    { name = "typer-slim", specifier = ">=0.19.2" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ipython", specifier = ">=9.6.0" }]
 
 [[package]]
 name = "loguru"
