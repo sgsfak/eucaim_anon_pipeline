@@ -153,7 +153,7 @@ def pipeline(
         copy_and_organize(ctp_output_dir, output_dir)
 
     # Step 3: Hash any clinical CSVs found in the input directory:
-    hash_clinical_csvs(input_dir, output_dir, site_id=pepper, ignore_prefix="_")
+    hash_clinical_csvs(input_dir, output_dir, site_id=pepper)
 
 
 if __name__ == "__main__":

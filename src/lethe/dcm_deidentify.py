@@ -5,6 +5,8 @@ from pathlib import Path
 
 from loguru import logger
 
+from .defaults import DEFAULT_UIDROOT
+
 CTPResults = namedtuple("CTPResults", ["elapsed_time", "processed_count"])
 
 
@@ -50,6 +52,8 @@ def run_ctp(
         str(threads),
         "-da",
         str(anon_script),
+        "-pUIDROOT",
+        DEFAULT_UIDROOT,
         "-pPROVIDERID",
         providerId,
         "-pSECRET_KEY",
