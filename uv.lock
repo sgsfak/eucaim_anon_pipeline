@@ -931,7 +931,7 @@ wheels = [
 
 [[package]]
 name = "lethe"
-version = "0.9.6"
+version = "0.9.7.dev1"
 source = { editable = "." }
 dependencies = [
     { name = "clevercsv" },

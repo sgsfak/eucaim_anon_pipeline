@@ -7,9 +7,17 @@ from pathlib import Path
 
 import rich
 import typer
+from rich.console import Console
+from rich.table import Table
 from typing_extensions import Annotated
 
 from .dcm_deidentify import run_ctp
+from .defaults import (
+    DEFAULT_IGNORE_CSV_PREFIX,
+    DEFAULT_PATIENT_ID_PREFIX,
+    DEFAULT_STUDIES_METADATA_CSV,
+    DEFAULT_UIDROOT,
+)
 from .hash_clinical import hash_clinical_csvs
 from .ocr_deidentify import PADDLE_DEFAULT_CPU_THREADS, perform_ocr
 from .output_dir import copy_and_organize
@@ -23,9 +31,11 @@ cli = typer.Typer(add_completion=False)
 
 
 def version_callback(value: bool):
+    console = Console()
     if value:
-        print(
-            textwrap.dedent(f"""
+        console.print(
+            textwrap.dedent(
+                f"""
             ██╗     ███████╗████████╗██╗  ██╗███████╗
             ██║     ██╔════╝╚══██╔══╝██║  ██║██╔════╝
             ██║     █████╗     ██║   ███████║█████╗
@@ -33,8 +43,15 @@ def version_callback(value: bool):
             ███████╗███████╗   ██║   ██║  ██║███████╗
             ╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝
             Version: {__version__}
-            """)
+            """,
+            ),
+            justify="left",
         )
+        console.print("Default settings", style="bold underline", justify="center")
+        console.print(f"UID root: {DEFAULT_UIDROOT}")
+        console.print(f"Patient ID prefix: {DEFAULT_PATIENT_ID_PREFIX}")
+        console.print(f"Studies metadata CSV: {DEFAULT_STUDIES_METADATA_CSV}")
+        console.print(f"Ignore CSV prefix: {DEFAULT_IGNORE_CSV_PREFIX}")
         raise typer.Exit()
 
 
