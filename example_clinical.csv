@@ -1,4 +1,4 @@
 PatientID,Gender,Age,Diagnosis
-foo,M,68,Breast Cancer
+foo,F,68,Breast Cancer
 bla,F,76,"agenesis of corpus callosum, cardiac, ocular, and genital syndrome"
-baz,F,75,Prostate cancer
+baz,M,75,Prostate cancer

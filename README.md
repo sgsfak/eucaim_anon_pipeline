@@ -45,46 +45,43 @@ docker run ghcr.io/sgsfak/eucaim_anon_pipeline --help
 which should return the following:
 
 ```
-Usage: lethe [OPTIONS] SITE_ID [INPUT_DIR] [OUTPUT_DIR]
+ Usage: lethe [OPTIONS] SITE_ID [INPUT_DIR] [OUTPUT_DIR]
 
-╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-│ *    site_id         TEXT          The SITE-ID provided by the EUCAIM        │
-│                                    Technical team                            │
-│                                    [required]                                │
-│      input_dir       [INPUT_DIR]   Input directory to read DICOM files from  │
-│                                    [default: /input]                         │
-│      output_dir      [OUTPUT_DIR]  Output directory to write processed DICOM │
-│                                    files to                                  │
-│                                    [default: /output]                        │
-╰──────────────────────────────────────────────────────────────────────────────╯
-╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --ocr                                             Perform OCR (using         │
-│                                                   Tesseract) and image       │
-│                                                   deidentication             │
-│ --paddle-ocr                                      Perform OCR using          │
-│                                                   PaddleOCR and image        │
-│                                                   deidentification           │
-│ --threads                                INTEGER  Number of threads that     │
-│                                                   RSNA CTP and PaddleOCR (if │
-│                                                   enabled) will use          │
-│                                                   [default: 10]              │
-│ --hierarchical      --no-hierarchical             Output files will be       │
-│                                                   organized into a           │
-│                                                   hierarchical Patient /     │
-│                                                   Study / Series folder      │
-│                                                   structure using the        │
-│                                                   anonymized UIDs as the     │
-│                                                   folder names               │
-│                                                   [default: hierarchical]    │
-│ --verbose       -v                                Enable verbose logging     │
-│ --help                                            Show this message and      │
-│                                                   exit.                      │
-╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Arguments ───────────────────────────────────────────────────────────────────────────────────────────╮
+│ *    site_id         TEXT          The SITE-ID provided by the EUCAIM Technical team [required]       │
+│      input_dir       [INPUT_DIR]   Input directory to read DICOM files from [default: /input]         │
+│      output_dir      [OUTPUT_DIR]  Output directory to write processed DICOM files to                 │
+│                                    [default: /output]                                                 │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --ctp               --no-ctp                      Perform deidentification in the DICOM metadata in   │
+│                                                   image files. Uses the RSNA CTP anonymizer and the   │
+│                                                   custom script                                       │
+│                                                   [default: ctp]                                      │
+│ --ocr                                             Perform OCR (using Tesseract OCR)                   │
+│ --paddle-ocr                                      Perform OCR using PaddleOCR                         │
+│ --threads                                INTEGER  Number of threads that RSNA CTP and PaddleOCR (if   │
+│                                                   enabled) will use                                   │
+│                                                   [default: 10]                                       │
+│ --secret                                 TEXT     Use the supplied key as the secret key for the      │
+│                                                   anonymization                                       │
+│ --hierarchical      --no-hierarchical             Output files will be organized into a hierarchical  │
+│                                                   Patient / Study / Series folder structure using the │
+│                                                   anonymized UIDs as the folder names                 │
+│                                                   [default: hierarchical]                             │
+│ --verbose       -v                                Enable verbose logging                              │
+│ --version       -V                                Print version information                           │
+│ --help                                            Show this message and exit.                         │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 ```
 
+* Option `--ctp` (default) will anonymize the DICOM files using the [RSNA CTP tool](https://mircwiki.rsna.org/index.php?title=The_CTP_DICOM_Pixel_Anonymizer). Supplying the `--no-ctp` option will disable this step.
 * Passing `--ocr` or `--paddle-ocr` will enable the Optical Character Recognition (OCR) feature for redacting "burned-in" text in the raw images. *Please note that by default no OCR will run!* The `--ocr` will run [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) and the `--paddle-ocr` will run [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR). PaddleOCR seems to be more accurate than Tesseract OCR but also slower and requires more resources.
 * `--threads` can be used to specify the number of threads that RSNA CTP and PaddleOCR (if enabled) will use and it can be used to increase the speed of the pipeline if it runs in multi-core CPU. By default, it is set to 10.
 * `--hierarchical` (default) will organize the anonymized DICOM files into a hierarchical folder structure based on the patient ID, study ID, and series ID. Each output DICOM file will also have a name consisting of digits based on an auto-numbering system, e.g. `00001.dcm`, `00002.dcm`, etc. **We suggest to always keep this option in the default `--hierarchical` mode, because it makes the output folder structure more organized but more importantly it makes sure that no sensitive information is leaked in the output folder and file names.**
+* `-v` will enable verbose mode, which will print more detailed information about the progress of the pipeline. In particular **the `secret key` used for the anonymization of the DICOM metadata will be printed to the console**.
+* `--secret <SECRET>` allows passing the secret key to be used for the anonymization of the DICOM metadata. This allows the consistent anonymization of a cohort of patients to be performed across multiple anonymization runs.
 
 #### PaddleOCR models
 PaddleOCR supports multiple different models for [text detection](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/text_detection.html), [text recognition](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/text_recognition.html), etc. By default in this Docker image we include the "lite" (mobile) models of PP-OCRv5: `PP-OCRv5_mobile_det` for text detection and `PP-OCRv5_mobile_rec` for text recognition as can be seen in the integrated [PaddleOCR.yaml](PaddleOCR.yaml) file. To further support additional models like the more complex and accurate "server" models, you can create your own YAML file (by copying the [PaddleOCR.yaml](PaddleOCR.yaml) file and modifying it) with the desired models and then running the `docker run` command with this new YAML file in the host machine mounted as `/app/PaddleOCR.yaml`, like so:
@@ -105,3 +102,7 @@ The CSVs to the processed (hashed) are assumed to have the following format:
 * The first column should contain the patientID
 
 You can see an example input CSV of this format [here](example_clinical.csv)
+
+
+> [!IMPORTANT]
+> A CSV file with name `dcm_studies_metadata.csv` is handled specially. It is assumed to contain information related to the DICOM studies referenced in the supplied DICOM files. An example of this would be to associate the DICOM studies to particular "timepoints" (e.g. "Diagnosis", "Treatment", "Follow-up") of the patients. To keep this association preserved after the anonymization, the CSV file should have the PatientID as the 1st column, the Study Instance UID as the 2nd column, followed by any additional columns (e.g. `Timepoint`). The pipeline will hash the contents of this file in the same way so that the output `dcm_studies_metadata.csv` file will have the anonymized PatientID and Study UIDs in the first 2 columns, followed by the values of the other columns in the original file with no modification. This input `dcm_studies_metadata.csv` CSV file is assumed to contain the column names in the first line too, but we don't care about the actual column names.

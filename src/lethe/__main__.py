@@ -2,13 +2,13 @@ import os
 import sys
 import tempfile
 import textwrap
-import uuid
 from pathlib import Path
 
 import rich
 import typer
+import uuid7
+from loguru import logger
 from rich.console import Console
-from rich.table import Table
 from typing_extensions import Annotated
 
 from .dcm_deidentify import run_ctp
@@ -28,6 +28,17 @@ OUTPUT_DIR: Path = Path("/output")
 
 
 cli = typer.Typer(add_completion=False)
+
+# Remove default handler
+logger.remove()
+
+# Add my own handler with a custom format (no {name})
+logger.add(
+    sink=sys.stderr,
+    format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> "
+    "| <level>{level: <8}</level> | "
+    "{function}:{line} - <level>{message}</level>",
+)
 
 
 def version_callback(value: bool):
@@ -76,17 +87,25 @@ def pipeline(
             show_default=True,
         ),
     ] = OUTPUT_DIR,
-    ocr: Annotated[
+    dcm_deintify: Annotated[
         bool,
         typer.Option(
-            "--ocr", help="Perform OCR (using Tesseract) and image deidentication"
+            "--ctp/--no-ctp",
+            help=(
+                "Perform deidentification in the DICOM metadata in image files. "
+                "Uses the RSNA CTP anonymizer and the custom script"
+            ),
         ),
+    ] = True,
+    ocr: Annotated[
+        bool,
+        typer.Option("--ocr", help="Perform OCR (using Tesseract OCR)"),
     ] = False,
     paddle_ocr: Annotated[
         bool,
         typer.Option(
             "--paddle-ocr",
-            help="Perform OCR using PaddleOCR and image deidentification",
+            help="Perform OCR using PaddleOCR",
         ),
     ] = False,
     threads: Annotated[
@@ -96,6 +115,13 @@ def pipeline(
             show_default=True,
         ),
     ] = PADDLE_DEFAULT_CPU_THREADS,
+    pepper: Annotated[
+        str | None,
+        typer.Option(
+            "--secret",
+            help="Use the supplied key as the secret key for the anonymization",
+        ),
+    ] = None,
     hierarchical: Annotated[
         bool,
         typer.Option(
@@ -128,8 +154,11 @@ def pipeline(
         )
         sys.exit(1)
 
-    pepper = uuid.uuid4().hex  # Create a random string for "pepper"
-
+    pepper = (
+        pepper or uuid7.create().hex
+    )  # Create a time based (UUIDv7) string as secret
+    if verbose:
+        logger.warning(f"Using secret key: {pepper}")
     # Step 1: Run OCR if enabled
     input_dir_images = input_dir
     if ocr or paddle_ocr:
@@ -138,22 +167,25 @@ def pipeline(
         input_dir_images = ocr_output_dir
 
     # Step 2: Run RSNA CTP
-    anon_script = Path(os.getcwd()) / "ctp" / "anon.script"
-    ctp_output_dir = Path(tempfile.mkdtemp()) if hierarchical else output_dir.absolute()
-    run_ctp(
-        input_dir=input_dir_images,
-        output_dir=ctp_output_dir,
-        anon_script=anon_script,
-        site_id=site_id,
-        pepper=pepper,
-        threads=threads,
-    )
-    # Step 2.1: Copy and organize files if hierarchical
-    if hierarchical:
-        copy_and_organize(ctp_output_dir, output_dir)
+    if dcm_deintify:
+        anon_script = Path(os.getcwd()) / "ctp" / "anon.script"
+        ctp_output_dir = (
+            Path(tempfile.mkdtemp()) if hierarchical else output_dir.absolute()
+        )
+        run_ctp(
+            input_dir=input_dir_images,
+            output_dir=ctp_output_dir,
+            anon_script=anon_script,
+            site_id=site_id,
+            pepper=pepper,
+            threads=threads,
+        )
+        # Step 2.1: Copy and organize files if hierarchical
+        if hierarchical:
+            copy_and_organize(ctp_output_dir, output_dir)
 
     # Step 3: Hash any clinical CSVs found in the input directory:
-    hash_clinical_csvs(input_dir, output_dir, site_id=pepper)
+    hash_clinical_csvs(input_dir, output_dir, secret_key=pepper, verbose=verbose)
 
 
 if __name__ == "__main__":
