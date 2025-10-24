@@ -931,7 +931,7 @@ wheels = [
 
 [[package]]
 name = "lethe"
-version = "0.9.8"
+version = "0.9.9.dev2"
 source = { editable = "." }
 dependencies = [
     { name = "clevercsv" },
@@ -945,6 +945,7 @@ dependencies = [
     { name = "presidio-anonymizer" },
     { name = "presidio-image-redactor" },
     { name = "pydicom" },
+    { name = "python-stdnum" },
     { name = "tqdm" },
     { name = "typer-slim" },
     { name = "uuid7-standard" },
@@ -968,6 +969,7 @@ requires-dist = [
     { name = "presidio-anonymizer", specifier = ">=2.2.360" },
     { name = "presidio-image-redactor", specifier = ">=0.0.57" },
     { name = "pydicom", specifier = ">=3.0.1" },
+    { name = "python-stdnum", specifier = ">=2.1" },
     { name = "tqdm", specifier = ">=4.67.1" },
     { name = "typer-slim", specifier = ">=0.19.2" },
     { name = "uuid7-standard", specifier = ">=1.1.0" },
@@ -2080,6 +2082,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/28/30/a67ed3d2297fdba1ef97dfd3440044ffe5523ab218d2a8c0f305e138d4be/python_gdcm-3.2.1-cp314-cp314-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:8b8872072fe76221900ecd5ee62ea0fb6525fde0ff6dfee5608c69af3d2bfcfd", size = 12248224, upload-time = "2025-09-11T18:05:49.202Z" },
     { url = "https://files.pythonhosted.org/packages/85/60/8360d0a9acb166c1dc300f6c52428d33ef7293c7af09ef2c75b64feb833c/python_gdcm-3.2.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:86c253a90eda104b01328d58e0273a9f50633969ae8a85837c08db03aebfde3f", size = 13244040, upload-time = "2025-09-11T18:05:52.661Z" },
     { url = "https://files.pythonhosted.org/packages/3a/3d/0e089e139135a3de2135ef57b26e2ce2d8b5da345cfd74f0ad74db0206d3/python_gdcm-3.2.1-cp314-cp314-win_amd64.whl", hash = "sha256:dafa164306e65b4b8220a3783df1944b1b6f9492d657404f1cc880177d8585fe", size = 34706044, upload-time = "2025-09-11T18:05:57.419Z" },
+]
+
+[[package]]
+name = "python-stdnum"
+version = "2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/83/60/fd8299c7d8990a7d802286ac604862387bcac3df08be7cb1c932c33ef7da/python_stdnum-2.1.tar.gz", hash = "sha256:6b01645969eb3dfd55061a0114d593753cd9e653cea9083198b7eea12644397a", size = 1238596, upload-time = "2025-05-17T13:18:43.506Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/67/04/730f619b5b8470adf0e029ee2f0a060689145ea64dec001c8bac3c3959e2/python_stdnum-2.1-py3-none-any.whl", hash = "sha256:25eabcf5f307dd4150fd8f1c03f4512a6caeb84c9f09be1448711f5803373c58", size = 1120175, upload-time = "2025-05-17T13:18:41.193Z" },
 ]
 
 [[package]]

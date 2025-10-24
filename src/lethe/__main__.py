@@ -9,6 +9,7 @@ import typer
 import uuid7
 from loguru import logger
 from rich.console import Console
+from stdnum import luhn
 from typing_extensions import Annotated
 
 from .dcm_deidentify import run_ctp
@@ -39,6 +40,18 @@ logger.add(
     "| <level>{level: <8}</level> | "
     "{function}:{line} - <level>{message}</level>",
 )
+
+
+def _create_secret_key() -> str:
+    u = uuid7.create().hex
+    d = luhn.calc_check_digit(u, alphabet="0123456789abcdef")
+    return f"{u}{d}"
+
+
+def _valid_secret_key(secret_key: str) -> bool:
+    if len(secret_key) != 33:
+        return False
+    return luhn.is_valid(secret_key, alphabet="0123456789abcdef")
 
 
 def version_callback(value: bool):
@@ -154,9 +167,12 @@ def pipeline(
         )
         sys.exit(1)
 
-    pepper = (
-        pepper or uuid7.create().hex
-    )  # Create a time based (UUIDv7) string as secret
+    if not pepper:
+        pepper = _create_secret_key()  # Create a time based (UUIDv7) string as secret
+    elif not _valid_secret_key(pepper):
+        rich.print("[red][bold]Error:[/bold] Invalid secret key[/red]")
+        sys.exit(1)
+
     if verbose:
         logger.warning(f"Using secret key: {pepper}")
     # Step 1: Run OCR if enabled
