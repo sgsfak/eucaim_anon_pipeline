@@ -4,15 +4,14 @@ An adapter for using PaddleOCR as the underlying OCR of Presidio.
 
 import numpy as np
 from paddleocr import PaddleOCR
-from paddleocr._constants import DEFAULT_CPU_THREADS
 from PIL.Image import Image
 from presidio_image_redactor import OCR
 
-PADDLE_DEFAULT_CPU_THREADS: int = DEFAULT_CPU_THREADS
+from .defaults import DEFAULT_CPU_THREADS
 
 
 def create_ocr(
-    *, num_threads: int = PADDLE_DEFAULT_CPU_THREADS, config_file: str | None = None
+    *, num_threads: int = DEFAULT_CPU_THREADS, config_file: str | None = None
 ):
     ocr: PaddleOCR = PaddleOCR(
         return_word_box=False,
@@ -59,7 +58,7 @@ class PresidioPaddleOCR(OCR):
     def __init__(self, config_file: str | None = None, num_threads: int | None = None):
         self.ocr_ = create_ocr(
             config_file=config_file,
-            num_threads=num_threads or PADDLE_DEFAULT_CPU_THREADS,
+            num_threads=num_threads or DEFAULT_CPU_THREADS,
         )
 
     def perform_ocr(self, image: object, **kwargs) -> dict:

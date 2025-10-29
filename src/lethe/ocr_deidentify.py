@@ -3,10 +3,9 @@ import time
 from pathlib import Path
 
 from loguru import logger
-from presidio_image_redactor import DicomImageRedactorEngine
 from tqdm import tqdm
 
-from .paddle_ocr import PADDLE_DEFAULT_CPU_THREADS, PresidioPaddleOCR
+from .defaults import DEFAULT_CPU_THREADS
 
 
 def perform_ocr(
@@ -14,10 +13,14 @@ def perform_ocr(
     output_dir: Path,
     paddle_ocr: bool = True,
     verbose: bool = False,
-    threads: int = PADDLE_DEFAULT_CPU_THREADS,
+    threads: int = DEFAULT_CPU_THREADS,
 ) -> None:
+    from presidio_image_redactor import DicomImageRedactorEngine
+
     engine = DicomImageRedactorEngine()
     if paddle_ocr:
+        from .paddle_ocr import PresidioPaddleOCR
+
         engine.image_analyzer_engine.ocr = PresidioPaddleOCR(
             config_file="PaddleOCR.yaml",
             num_threads=threads,
