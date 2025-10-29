@@ -1,6 +1,6 @@
 [project]
 name = "lethe"
-version = "0.9.9.dev2"
+version = "0.9.10"
 description = "A DICOM Anonymization pipeline in a Docker container"
 readme = "README.md"
 requires-python = ">=3.11"
