@@ -106,3 +106,11 @@ You can see an example input CSV of this format [here](example_clinical.csv)
 
 > [!IMPORTANT]
 > A CSV file with name `dcm_studies_metadata.csv` is handled specially. It is assumed to contain information related to the DICOM studies referenced in the supplied DICOM files. An example of this would be to associate the DICOM studies to particular "timepoints" (e.g. "Diagnosis", "Treatment", "Follow-up") of the patients. To keep this association preserved after the anonymization, the CSV file should have the PatientID as the 1st column, the Study Instance UID as the 2nd column, followed by any additional columns (e.g. `Timepoint`). The pipeline will hash the contents of this file in the same way so that the output `dcm_studies_metadata.csv` file will have the anonymized PatientID and Study UIDs in the first 2 columns, followed by the values of the other columns in the original file with no modification. This input `dcm_studies_metadata.csv` CSV file is assumed to contain the column names in the first line too, but we don't care about the actual column names.
+
+## Disclaimer
+
+This software is provided by the [Computational BioMedicine Laboratory (CBML), FORTH-ICS](https://www.ics.forth.gr/cbml/) under the terms of the European Union Public License (EUPL).  It is distributed in the hope that it will be useful, but **without any warranty** — not even the implied warranties of merchantability, fitness for a particular purpose, or non-infringement.
+
+CBML and its contributors **accept no responsibility or liability** for any loss, damage, or legal issues arising from the use, misuse, or inability to use this software.  Users are solely responsible for ensuring that any anonymization performed with this tool meets applicable legal, regulatory, and institutional requirements (including those related to patient data protection and privacy).
+
+Use this tool at your own risk.
