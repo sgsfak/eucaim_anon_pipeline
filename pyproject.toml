@@ -25,6 +25,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ipython>=9.6.0",
+    "pre-commit>=4.3.0",
 ]
 
 [build-system]
