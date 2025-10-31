@@ -140,19 +140,21 @@ docker run -it ghcr.io/sgsfak/eucaim_anon_pipeline utils secret
 
 will write in the console a string like `019a39ba16da7edb9e906440a48e9ed32` which can be used as a secret key in the `run` pipeline command.
 
-The `utils series-info` command can be used to get an overview of all the DICOM series that can be found in an input folder. It presents a table as shown below. The series information is summarized according to the Series Description tag ([0008,103E](https://dicom.innolitics.com/ciods/mr-image/general-series/0008103e)) so each row is a unique description that can be found in multiple DICOM series of different studies and patients. The `Modalities` column presents the different DICOM [modalities](https://dicom.innolitics.com/ciods/mr-image/general-series/00080060) found that have the specific description, whereas the other columns show the count of studies, patients, and series. The total number of DICOM series found is also shown right after the table.
+The `utils series-info` command can be used to get an overview of all the DICOM series that can be found in an input folder. It presents a table as shown below. The series information is summarized according to the Series Description tag ([0008,103E](https://dicom.innolitics.com/ciods/mr-image/general-series/0008103e)) so each row is a unique description that can be found in multiple DICOM series of different studies and patients. The `Modalities` column presents the different DICOM [modalities](https://dicom.innolitics.com/ciods/mr-image/general-series/00080060) found that have the specific description, whereas the other columns show the count of studies, patients, and series. The total number of DICOM series, studies, and patients found is also shown right after the table.
 
 ```
 Series information (Series are grouped by their descriptions)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
 ┃ Series Description            ┃ Modalities ┃ Studies count ┃ Patients count ┃ Series count ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
-│ DBT slices                    │ MG         │ 1             │ 1              │ 3            │
+│ DBT slices                    │ MG         │ 3             │ 1              │ 3            │
 │ LIVER-PELVIS/HASTE_AXIAL_P    │ MR         │ 1             │ 1              │ 1            │
-│ PARENCHYMAL PHASE Sep1999     │ CT         │ 1             │ 1              │ 2            │
+│ PARENCHYMAL PHASE Sep1999     │ CT         │ 2             │ 1              │ 2            │
 │ t2_spc_rst_axial obl_Prostate │ MR         │ 1             │ 1              │ 1            │
 └───────────────────────────────┴────────────┴───────────────┴────────────────┴──────────────┘
 Total count of Series: 7
+Total count of Studies: 7
+Total count of Patients: 4
 ```
 
 ## Disclaimer

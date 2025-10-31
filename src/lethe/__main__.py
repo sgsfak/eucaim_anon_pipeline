@@ -121,13 +121,16 @@ def series_info(
     table.add_column("Patients count")
     table.add_column("Series count", style="green")
 
+    series_info = sorted(series_information(input_dir), key=key)
+    pids = set(i.patient_id for i in series_info)
+    studies = set((i.patient_id, i.study_uid) for i in series_info)
     total_count = 0
-    for descr, g in groupby(sorted(series_information(input_dir), key=key), key):
+    for descr, g in groupby(series_info, key):
         infos = list(g)
         total_count += len(infos)
         modalities = set(i.modality for i in infos)
-        studies_cnt = len(set(i.study_description for i in infos))
         pids_cnt = len(set(i.patient_id for i in infos))
+        studies_cnt = len(set((i.patient_id, i.study_uid) for i in infos))
         table.add_row(
             descr,
             ",".join(modalities),
@@ -138,6 +141,8 @@ def series_info(
     console.print()
     console.print(table)
     console.print(f"Total count of Series: {total_count}", style="bold")
+    console.print(f"Total count of Studies: {len(studies)}", style="bold")
+    console.print(f"Total count of Patients: {len(pids)}", style="bold")
 
 
 @cli.command(help="Run the DICOM anonymization pipeline")
