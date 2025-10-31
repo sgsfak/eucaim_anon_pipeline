@@ -103,7 +103,7 @@ def secret():
 @utils_cli.command(
     help="Extract and print the unique Series descriptions from input DICOM files"
 )
-def series_descr(
+def series_info(
     input_dir: Annotated[
         Path,
         typer.Argument(
@@ -111,19 +111,19 @@ def series_descr(
         ),
     ] = INPUT_DIR,
 ):
-    _print_series_info(input_dir, "series_description")
+    _print_series_info(input_dir)
 
 
 def _print_series_info(
-    input_dir: Path, what=Literal["series_description"] | Literal["study_description"]
+    input_dir: Path,
 ):
-    key = attrgetter(what)
+    key = attrgetter("series_description")
     console = Console()
 
-    name = "Series" if what == "series_description" else "Study"
-    table = Table()
+    table = Table(title="Series information grouped by their descriptions")
 
-    table.add_column(f"{name} Description", justify="left", style="bold", no_wrap=True)
+    table.add_column(f"Series Description", justify="left", style="bold", no_wrap=True)
+    table.add_column(f"Study Description", justify="left", style="bold", no_wrap=True)
     table.add_column("Modalities", style="magenta")
     table.add_column("Series Count", style="green")
 
@@ -132,23 +132,10 @@ def _print_series_info(
         infos = list(g)
         total_count += len(infos)
         modalities = set(i.modality for i in infos)
-        table.add_row(descr, ",".join(modalities), f"{len(infos)}")
+        studies = set(i.study_description for i in infos)
+        table.add_row(descr, ",".join(studies), ",".join(modalities), f"{len(infos)}")
     console.print(table)
-    console.print(f"Total Series: {total_count}", style="bold")
-
-
-@utils_cli.command(
-    help="Extract and print the unique Study descriptions from input DICOM files"
-)
-def study_descr(
-    input_dir: Annotated[
-        Path,
-        typer.Argument(
-            help="Input directory to read DICOM files from", show_default=True
-        ),
-    ] = INPUT_DIR,
-):
-    _print_series_info(input_dir, "study_description")
+    console.print(f"Total count of Series: {total_count}", style="bold")
 
 
 @cli.command(help="Run the DICOM anonymization pipeline")
