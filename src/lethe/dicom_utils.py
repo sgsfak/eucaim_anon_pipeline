@@ -3,7 +3,6 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Generator
 
-from loguru import logger
 from pydicom import FileDataset, dcmread
 
 DcmFileInfo = namedtuple(
@@ -55,7 +54,7 @@ def series_information(input_dir: Path) -> Generator[SeriesInfo, None, None]:
                     modality=dataset.Modality,
                 )
                 yield series_info
-            except Exception as e:
+            except Exception:
                 continue
 
 

@@ -28,7 +28,7 @@ docker pull ghcr.io/sgsfak/eucaim_anon_pipeline
 Then you can run the pipeline using the following command, which shows the bare minimum information required to run the pipeline:
 
 ```
-docker run -it -v <INPUT-DIR>:/input -v <OUTPUT-DIR>:/output ghcr.io/sgsfak/eucaim_anon_pipeline <SITE-ID>
+docker run -it -v <INPUT-DIR>:/input -v <OUTPUT-DIR>:/output ghcr.io/sgsfak/eucaim_anon_pipeline run <SITE-ID>
 ```
 
 where the options are as follows:
@@ -40,7 +40,7 @@ where the options are as follows:
 There are more options that can be specified in the command line. To see the list of available options, please run:
 
 ```
-docker run -it ghcr.io/sgsfak/eucaim_anon_pipeline --help
+docker run -it ghcr.io/sgsfak/eucaim_anon_pipeline run --help
 ```
 which should return the following:
 
@@ -80,8 +80,8 @@ which should return the following:
 * Passing `--ocr` or `--paddle-ocr` will enable the Optical Character Recognition (OCR) feature for redacting "burned-in" text in the raw images. **Please note that by default no OCR will run!** The `--ocr` will run [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) and the `--paddle-ocr` will run [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR). PaddleOCR seems to be more accurate than Tesseract OCR but also slower and requires more resources.
 * `--threads` can be used to specify the number of threads that RSNA CTP and PaddleOCR (if enabled) will use and it can be used to increase the speed of the pipeline if it runs in multi-core CPU. By default, it is set to 10.
 * `--hierarchical` (default) will organize the anonymized DICOM files into a hierarchical folder structure based on the patient ID, study ID, and series ID. Each output DICOM file will also have a name consisting of digits based on an auto-numbering system, e.g. `00001.dcm`, `00002.dcm`, etc. **We suggest to always keep this option in the default `--hierarchical` mode, because it makes the output folder structure more organized but more importantly it makes sure that no sensitive information is leaked through the folder and file names.**
-* `-v` will enable verbose mode, which will print more detailed information about the progress of the pipeline. In particular **the `secret key` used for the anonymization of the DICOM metadata will be printed to the console**.
-* `--secret <SECRET>` allows passing the secret key to be used for the anonymization of the DICOM metadata. This allows the consistent anonymization of a cohort of patients to be performed across multiple anonymization runs.
+* `-v` (or `--verbose`) will enable verbose mode, which will print more detailed information about the progress of the pipeline. In particular **the `secret key` used for the anonymization of the DICOM metadata will be printed to the console**.
+* `--secret <SECRET>` allows passing the secret key to be used for the anonymization of the DICOM metadata. This allows the consistent anonymization of a cohort of patients to be performed across multiple anonymization runs. You can get a "good" secret key either by running the pipeline once with the `--verbose` option or using the `utils secret` subcommand explained a [bit further below](#utilities).
 
 #### PaddleOCR models
 PaddleOCR supports multiple different models for [text detection](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/text_detection.html), [text recognition](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/text_recognition.html), etc. By default in this Docker image we include the "lite" (mobile) models of PP-OCRv5: `PP-OCRv5_mobile_det` for text detection and `PP-OCRv5_mobile_rec` for text recognition as can be seen in the integrated [PaddleOCR.yaml](PaddleOCR.yaml) file. To further support additional models like the more complex and accurate "server" models, you can create your own YAML file (by copying the [PaddleOCR.yaml](PaddleOCR.yaml) file and modifying it) with the desired models and then running the `docker run` command with this new YAML file in the host machine mounted as `/app/PaddleOCR.yaml`, like so:
@@ -106,6 +106,54 @@ You can see an example input CSV of this format [here](example_clinical.csv)
 
 > [!IMPORTANT]
 > A CSV file with name `dcm_studies_metadata.csv` is handled specially. It is assumed to contain information related to the DICOM studies referenced in the supplied DICOM files. An example of this would be to associate the DICOM studies to particular "timepoints" (e.g. "Diagnosis", "Treatment", "Follow-up") of the patients. To keep this association preserved after the anonymization, the CSV file should have the PatientID as the 1st column, the Study Instance UID as the 2nd column, followed by any additional columns (e.g. `Timepoint`). The pipeline will hash the contents of this file in the same way so that the output `dcm_studies_metadata.csv` file will have the anonymized PatientID and Study UIDs in the first 2 columns, followed by the values of the other columns in the original file with no modification. This input `dcm_studies_metadata.csv` CSV file is assumed to contain the column names in the first line too, but we don't care about the actual column names.
+
+### <a name="utilities"></a>Utilities
+
+In addition to the `run` command that runs the DICOM de-idenitification pipeline as explained above, there is also a `utils` command that offers additional functionality.
+
+As usual you can use the `--help`:
+
+```
+docker run -it ghcr.io/sgsfak/eucaim_anon_pipeline utils --help
+```
+
+which shows the available utilities:
+
+```
+ Usage: utils [OPTIONS] COMMAND [ARGS]...
+
+ Additional utilities
+
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                                        │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ─────────────────────────────────────────────────────────────────────────────────────────╮
+│ secret        Create a new 'secret' key to use for anonymization                                   │
+│ series-info   Extract and print the unique Series descriptions from input DICOM files              │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+So the following complete command:
+```
+docker run -it ghcr.io/sgsfak/eucaim_anon_pipeline utils secret
+```
+
+will write in the console a string like `019a39ba16da7edb9e906440a48e9ed32` which can be used as a secret key in the `run` pipeline command.
+
+The `utils series-info` command can be used to get an overview of all the DICOM series that can be found in an input folder. It presents a table as shown below. The series information is summarized according to the Series Description tag ([0008,103E](https://dicom.innolitics.com/ciods/mr-image/general-series/0008103e)) so each row is a unique description that can be found in multiple DICOM series of different studies and patients. The `Modalities` column presents the different DICOM [modalities](https://dicom.innolitics.com/ciods/mr-image/general-series/00080060) found that have the specific description, whereas the other columns show the count of studies, patients, and series. The total number of DICOM series found is also shown right after the table.
+
+```
+Series information (Series are grouped by their descriptions)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Series Description            ┃ Modalities ┃ Studies count ┃ Patients count ┃ Series count ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ DBT slices                    │ MG         │ 1             │ 1              │ 3            │
+│ LIVER-PELVIS/HASTE_AXIAL_P    │ MR         │ 1             │ 1              │ 1            │
+│ PARENCHYMAL PHASE Sep1999     │ CT         │ 1             │ 1              │ 2            │
+│ t2_spc_rst_axial obl_Prostate │ MR         │ 1             │ 1              │ 1            │
+└───────────────────────────────┴────────────┴───────────────┴────────────────┴──────────────┘
+Total count of Series: 7
+```
 
 ## Disclaimer
 

@@ -5,7 +5,6 @@ import textwrap
 from itertools import groupby
 from operator import attrgetter
 from pathlib import Path
-from typing import Literal
 
 import rich
 import typer
@@ -36,7 +35,7 @@ OUTPUT_DIR: Path = Path("/output")
 
 cli = typer.Typer(add_completion=False)
 utils_cli = typer.Typer()
-cli.add_typer(utils_cli, name="utils")
+cli.add_typer(utils_cli, name="utils", help="Additional utilities")
 
 # Remove default handler
 logger.remove()
@@ -97,7 +96,7 @@ def version_callback(value: bool):
 def secret():
     secret = _create_secret_key()
     console = Console()
-    console.print(f"Secret key: {secret}")
+    console.print(f"[bold][magenta]{secret}[/]")
 
 
 @utils_cli.command(
@@ -111,29 +110,32 @@ def series_info(
         ),
     ] = INPUT_DIR,
 ):
-    _print_series_info(input_dir)
-
-
-def _print_series_info(
-    input_dir: Path,
-):
     key = attrgetter("series_description")
     console = Console()
 
-    table = Table(title="Series information grouped by their descriptions")
+    table = Table(title="Series information (Series are grouped by their descriptions)")
 
-    table.add_column(f"Series Description", justify="left", style="bold", no_wrap=True)
-    table.add_column(f"Study Description", justify="left", style="bold", no_wrap=True)
+    table.add_column("Series Description", justify="left", style="bold", no_wrap=True)
     table.add_column("Modalities", style="magenta")
-    table.add_column("Series Count", style="green")
+    table.add_column("Studies count")
+    table.add_column("Patients count")
+    table.add_column("Series count", style="green")
 
     total_count = 0
     for descr, g in groupby(sorted(series_information(input_dir), key=key), key):
         infos = list(g)
         total_count += len(infos)
         modalities = set(i.modality for i in infos)
-        studies = set(i.study_description for i in infos)
-        table.add_row(descr, ",".join(studies), ",".join(modalities), f"{len(infos)}")
+        studies_cnt = len(set(i.study_description for i in infos))
+        pids_cnt = len(set(i.patient_id for i in infos))
+        table.add_row(
+            descr,
+            ",".join(modalities),
+            f"{studies_cnt}",
+            f"{pids_cnt}",
+            f"{len(infos)}",
+        )
+    console.print()
     console.print(table)
     console.print(f"Total count of Series: {total_count}", style="bold")
 

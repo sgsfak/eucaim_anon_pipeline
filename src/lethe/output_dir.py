@@ -3,11 +3,8 @@ Copy from an input folder all dicom files to an output folder. In hte output fol
 will be organized in a hierarchical structure based on the patient ID , study UID, and series UID.
 """
 
-import os
 import shutil
-from collections import namedtuple
 from pathlib import Path
-from typing import Generator
 
 from loguru import logger
 
