@@ -58,7 +58,7 @@ def series_information(input_dir: Path) -> Iterable[SeriesInfo]:
                 seen_so_far[key] = series_info
             except Exception:
                 continue
-        return seen_so_far.values()
+    return seen_so_far.values()
 
 
 def dcm_generator(input_folder: Path | str) -> Generator[DcmFileInfo, None, None]:
