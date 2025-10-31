@@ -87,7 +87,7 @@ which should return the following:
 PaddleOCR supports multiple different models for [text detection](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/text_detection.html), [text recognition](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/text_recognition.html), etc. By default in this Docker image we include the "lite" (mobile) models of PP-OCRv5: `PP-OCRv5_mobile_det` for text detection and `PP-OCRv5_mobile_rec` for text recognition as can be seen in the integrated [PaddleOCR.yaml](PaddleOCR.yaml) file. To further support additional models like the more complex and accurate "server" models, you can create your own YAML file (by copying the [PaddleOCR.yaml](PaddleOCR.yaml) file and modifying it) with the desired models and then running the `docker run` command with this new YAML file in the host machine mounted as `/app/PaddleOCR.yaml`, like so:
 
 ```
-docker run -it -v <INPUT-DIR>:/input -v <OUTPUT-DIR>:/output -v <PADDLEOCR_YAML_FILE>:/app/PaddleOCR.yaml ghcr.io/sgsfak/eucaim_anon_pipeline <SITE-ID> --paddle-ocr
+docker run -it -v <INPUT-DIR>:/input -v <OUTPUT-DIR>:/output -v <PADDLEOCR_YAML_FILE>:/app/PaddleOCR.yaml ghcr.io/sgsfak/eucaim_anon_pipeline run <SITE-ID> --paddle-ocr
 ```
 
 ### Clinical data
