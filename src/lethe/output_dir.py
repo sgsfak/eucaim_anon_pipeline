@@ -10,35 +10,15 @@ from pathlib import Path
 from typing import Generator
 
 from loguru import logger
-from pydicom import FileDataset, dcmread
 
-_DcmFileInfo = namedtuple(
-    "_DcmFileInfo", ["path", "patient_id", "study_uid", "series_uid", "instance_number"]
-)
-
-
-def _dcm_generator(input_folder: Path | str) -> Generator[_DcmFileInfo, None, None]:
-    for root, dirs, files in os.walk(os.fspath(input_folder), topdown=True):
-        for file in files:
-            file_path = os.path.join(root, file)
-            try:
-                ds: FileDataset = dcmread(file_path, stop_before_pixels=True)
-                yield _DcmFileInfo(
-                    Path(file_path),
-                    ds.PatientID,
-                    ds.StudyInstanceUID,
-                    ds.SeriesInstanceUID,
-                    ds.InstanceNumber,
-                )
-            except Exception:
-                continue
+from .dicom_utils import dcm_generator
 
 
 def copy_and_organize(input_folder: Path, output_folder: Path):
     cnt = 0
     dirs: dict[str, int] = {}
     # XXX: Should we order by InstanceNumber ??
-    for dcm_info in _dcm_generator(input_folder):
+    for dcm_info in dcm_generator(input_folder):
         current_output_folder = (
             output_folder
             / dcm_info.patient_id

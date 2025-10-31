@@ -2,13 +2,17 @@ import os
 import sys
 import tempfile
 import textwrap
+from itertools import groupby
+from operator import attrgetter
 from pathlib import Path
+from typing import Literal
 
 import rich
 import typer
 import uuid7
 from loguru import logger
 from rich.console import Console
+from rich.table import Table
 from stdnum import luhn
 from typing_extensions import Annotated
 
@@ -20,6 +24,7 @@ from .defaults import (
     DEFAULT_STUDIES_METADATA_CSV,
     DEFAULT_UIDROOT,
 )
+from .dicom_utils import series_information
 from .hash_clinical import hash_clinical_csvs
 from .ocr_deidentify import perform_ocr
 from .output_dir import copy_and_organize
@@ -30,6 +35,8 @@ OUTPUT_DIR: Path = Path("/output")
 
 
 cli = typer.Typer(add_completion=False)
+utils_cli = typer.Typer()
+cli.add_typer(utils_cli, name="utils")
 
 # Remove default handler
 logger.remove()
@@ -77,7 +84,7 @@ def version_callback(value: bool):
     console = Console()
     if value:
         console.print(_header_info(), justify="left")
-        console.print("Default settings", style="bold underline", justify="center")
+        console.print("Default settings", style="bold underline", justify="left")
         console.print(f"UID root: {DEFAULT_UIDROOT}")
         console.print(f"Patient ID prefix: {DEFAULT_PATIENT_ID_PREFIX}")
         console.print(f"Studies metadata CSV: {DEFAULT_STUDIES_METADATA_CSV}")
@@ -86,8 +93,67 @@ def version_callback(value: bool):
         raise typer.Exit()
 
 
-@cli.command()
-def pipeline(
+@utils_cli.command(help="Create a new 'secret' key to use for anonymization")
+def secret():
+    secret = _create_secret_key()
+    console = Console()
+    console.print(f"Secret key: {secret}")
+
+
+@utils_cli.command(
+    help="Extract and print the unique Series descriptions from input DICOM files"
+)
+def series_descr(
+    input_dir: Annotated[
+        Path,
+        typer.Argument(
+            help="Input directory to read DICOM files from", show_default=True
+        ),
+    ] = INPUT_DIR,
+):
+    _print_series_info(input_dir, "series_description")
+
+
+def _print_series_info(
+    input_dir: Path, what=Literal["series_description"] | Literal["study_description"]
+):
+    key = attrgetter(what)
+    console = Console()
+
+    name = "Series" if what == "series_description" else "Study"
+    table = Table()
+
+    table.add_column(f"{name} Description", justify="left", style="bold", no_wrap=True)
+    table.add_column("Modalities", style="magenta")
+    table.add_column("Series Count", style="green")
+
+    total_count = 0
+    for descr, g in groupby(sorted(series_information(input_dir), key=key), key):
+        infos = list(g)
+        total_count += len(infos)
+        modalities = set(i.modality for i in infos)
+        table.add_row(descr, ",".join(modalities), f"{len(infos)}")
+    console.print(table)
+    console.print(f"Total Series: {total_count}", style="bold")
+
+
+@utils_cli.command(
+    help="Extract and print the unique Study descriptions from input DICOM files"
+)
+def study_descr(
+    input_dir: Annotated[
+        Path,
+        typer.Argument(
+            help="Input directory to read DICOM files from", show_default=True
+        ),
+    ] = INPUT_DIR,
+):
+    _print_series_info(input_dir, "study_description")
+
+
+@cli.command(help="Run the DICOM anonymization pipeline")
+def run(
+    ctx: typer.Context,
     site_id: Annotated[
         str,
         typer.Argument(
@@ -168,6 +234,8 @@ def pipeline(
         ),
     ] = None,
 ):
+    print(vars(ctx))
+    return
     if paddle_ocr and ocr:
         rich.print(
             "[red][bold]Error:[/bold] Cannot use both PaddleOCR and TesseractOCR: please choose one, use --help for usage information[/red]"
@@ -213,4 +281,4 @@ def pipeline(
 
 
 if __name__ == "__main__":
-    cli(prog_name="lethe")
+    cli(prog_name="")
