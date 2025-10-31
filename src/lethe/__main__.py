@@ -109,40 +109,73 @@ def series_info(
             help="Input directory to read DICOM files from", show_default=True
         ),
     ] = INPUT_DIR,
+    csv: Annotated[
+        bool,
+        typer.Option("--csv", help="Print series information in CSV format"),
+    ] = False,
 ):
     key = attrgetter("series_description")
+    series_info = sorted(series_information(input_dir), key=key)
+
+    rows: list[tuple[str]] = []
+    total_count = 0
+    total_img_count = 0
+    for descr, g in groupby(series_info, key):
+        infos = list(g)
+        total_count += len(infos)
+        total_img_count += sum(i.image_count for i in infos)
+        modalities = set(i.modality for i in infos)
+        pids_cnt = len(set(i.patient_id for i in infos))
+        studies_cnt = len(set((i.patient_id, i.study_uid) for i in infos))
+        rows.append(
+            (
+                descr,
+                ",".join(modalities),
+                f"{pids_cnt}",
+                f"{studies_cnt}",
+                f"{len(infos)}",
+            )
+        )
+
+    if csv:
+        import clevercsv
+
+        writer = clevercsv.writer(sys.stdout, "excel")
+
+        writer.writerow(
+            [
+                "series_description",
+                "modalities",
+                "patients_count",
+                "studies_count",
+                "series_count",
+            ]
+        )
+
+        for row in rows:
+            writer.writerow(row)
+        return
+
     console = Console()
 
     table = Table(title="Series information (Series are grouped by their descriptions)")
 
     table.add_column("Series Description", justify="left", style="bold", no_wrap=True)
     table.add_column("Modalities", style="magenta")
-    table.add_column("Studies count")
     table.add_column("Patients count")
+    table.add_column("Studies count")
     table.add_column("Series count", style="green")
 
-    series_info = sorted(series_information(input_dir), key=key)
     pids = set(i.patient_id for i in series_info)
     studies = set((i.patient_id, i.study_uid) for i in series_info)
-    total_count = 0
-    for descr, g in groupby(series_info, key):
-        infos = list(g)
-        total_count += len(infos)
-        modalities = set(i.modality for i in infos)
-        pids_cnt = len(set(i.patient_id for i in infos))
-        studies_cnt = len(set((i.patient_id, i.study_uid) for i in infos))
-        table.add_row(
-            descr,
-            ",".join(modalities),
-            f"{studies_cnt}",
-            f"{pids_cnt}",
-            f"{len(infos)}",
-        )
+    for row in rows:
+        table.add_row(*row)
     console.print()
     console.print(table)
-    console.print(f"Total count of Series: {total_count}", style="bold")
-    console.print(f"Total count of Studies: {len(studies)}", style="bold")
-    console.print(f"Total count of Patients: {len(pids)}", style="bold")
+    console.print(f"Total count of unique Patients: {len(pids)}", style="bold")
+    console.print(f"Total count of unique Studies: {len(studies)}", style="bold")
+    console.print(f"Total count of unique Series: {total_count}", style="bold")
+    console.print(f"Total count of DICOM files: {total_img_count}", style="bold")
 
 
 @cli.command(help="Run the DICOM anonymization pipeline")

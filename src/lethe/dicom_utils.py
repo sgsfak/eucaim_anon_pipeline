@@ -1,7 +1,7 @@
 import os
 from collections import namedtuple
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Iterable
 
 from pydicom import FileDataset, dcmread
 
@@ -26,12 +26,13 @@ SeriesInfo = namedtuple(
         "series_description",
         "study_description",
         "modality",
+        "image_count",
     ],
 )
 
 
-def series_information(input_dir: Path) -> Generator[SeriesInfo, None, None]:
-    seen_so_far: dict[tuple[str, str, str], bool] = {}
+def series_information(input_dir: Path) -> Iterable[SeriesInfo]:
+    seen_so_far: dict[tuple[str, str, str], SeriesInfo] = {}
     for root, dirs, files in os.walk(os.fspath(input_dir), topdown=True):
         for file in files:
             file_path = os.path.join(root, file)
@@ -43,8 +44,8 @@ def series_information(input_dir: Path) -> Generator[SeriesInfo, None, None]:
                     dataset.SeriesInstanceUID,
                 )
                 if key in seen_so_far:
+                    seen_so_far[key].image_count += 1
                     continue
-                seen_so_far[key] = True
                 series_info = SeriesInfo(
                     patient_id=dataset.PatientID,
                     study_uid=dataset.StudyInstanceUID,
@@ -52,10 +53,12 @@ def series_information(input_dir: Path) -> Generator[SeriesInfo, None, None]:
                     series_description=dataset.SeriesDescription,
                     study_description=dataset.StudyDescription,
                     modality=dataset.Modality,
+                    image_count=1,
                 )
-                yield series_info
+                seen_so_far[key] = series_info
             except Exception:
                 continue
+        return seen_so_far.values()
 
 
 def dcm_generator(input_folder: Path | str) -> Generator[DcmFileInfo, None, None]:
