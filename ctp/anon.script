@@ -123,7 +123,7 @@
  <e en="T" n="OperatorName" t="00081070">@remove()</e>
  <e en="T" n="OperatorIdentificationSeq" t="00081072">@remove()</e>
  <e en="T" n="AdmittingDiagnosisDescription" t="00081080">@remove()</e>
- <e en="T" n="AdmittingDiagnosisCodeSeq" t="00081084">@keep()</e>
+ <e en="T" n="AdmittingDiagnosisCodeSeq" t="00081084">@remove()</e>
  <e en="T" n="ManufacturerModelName" t="00081090">@keep()</e>
  <e en="T" n="RefResultsSeq" t="00081100">@remove()</e>
  <e en="T" n="RefStudySeq" t="00081110">@keep()</e>
@@ -256,7 +256,7 @@
  <e en="T" n="PatientBirthName" t="00101005">@remove()</e>
  <e en="T" n="PatientAge" t="00101010">@keep()</e>
  <e en="T" n="PatientSize" t="00101020">@keep()</e>
- <e en="T" n="PatientSizeCodeSeq" t="00101021">@keep()</e>
+ <e en="T" n="PatientSizeCodeSeq" t="00101021">@remove()</e>
  <e en="T" n="PatientBodyMassIndex" t="00101022">@keep()</e>
  <e en="T" n="MeasuredAPDimension" t="00101023">@keep()</e>
  <e en="T" n="MeasuredLateralDimension" t="00101024">@keep()</e>
