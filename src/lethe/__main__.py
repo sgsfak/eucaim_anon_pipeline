@@ -261,8 +261,6 @@ def run(
         ),
     ] = None,
 ):
-    print(vars(ctx))
-    return
     if paddle_ocr and ocr:
         rich.print(
             "[red][bold]Error:[/bold] Cannot use both PaddleOCR and TesseractOCR: please choose one, use --help for usage information[/red]"
