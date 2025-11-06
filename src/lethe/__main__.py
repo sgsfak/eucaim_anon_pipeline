@@ -118,8 +118,9 @@ def series_info(
         typer.Option("--csv", help="Print series information in CSV format"),
     ] = False,
 ):
-    series = series_information(input_dir)
+    # UnGrouped but sorted by PatientID:
     if not grouped:
+        series = sorted(series_information(input_dir), key=attrgetter("patient_id"))
         if csv:
             import clevercsv
 
@@ -171,8 +172,9 @@ def series_info(
         console.print()
         console.print(table)
         return
+    # Grouped by SeriesDescription:
     key: attrgetter[str] = attrgetter("series_description")
-    series_info = sorted(series, key=key)
+    series_info = sorted(series_information(input_dir), key=key)
 
     rows: list[tuple[str]] = []
     total_count = 0
