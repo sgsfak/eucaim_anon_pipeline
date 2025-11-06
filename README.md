@@ -160,6 +160,23 @@ Total count of DICOM files: 7
 
 If you supply the `--csv` option to `utils series-info` will instead print the series information (shown in table above) in CSV format.
 
+If you supply the `--ungrouped` option to `utils series-info` will instead print the series information "ungrouped" i.e. each row represents a single series, like so:
+
+```
+                                                                                             Series information
+┏━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ PatientID  ┃ StudyUID                                                         ┃ SeriesUID                                                        ┃ Modality ┃ SeriesDescription             ┃ ImageCount ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ 3209648408 │ 1.2.826.0.1.3680043.8.498.15325708537294505104277328793123984041 │ 1.2.826.0.1.3680043.8.498.21727307543319369287645065784568861179 │ CT       │ PARENCHYMAL PHASE Sep1999     │ 1          │
+│ 571403367  │ 1.2.826.0.1.3680043.8.498.60031442536880637581306951540659454726 │ 1.2.826.0.1.3680043.8.498.10108928214392221999942909773938492911 │ MG       │ DBT slices                    │ 1          │
+│ 3209648408 │ 1.2.826.0.1.3680043.8.498.10492038307422868223199863260233355278 │ 1.2.826.0.1.3680043.8.498.34901162804853023415490754909481583213 │ CT       │ PARENCHYMAL PHASE Sep1999     │ 1          │
+│ 8732322741 │ 1.2.826.0.1.3680043.8.498.11505123464109404670942682899455583584 │ 1.2.826.0.1.3680043.8.498.42020251536922680292646612864203256535 │ MR       │ t2_spc_rst_axial obl_Prostate │ 1          │
+│ 571403367  │ 1.2.826.0.1.3680043.8.498.11930027078857085215653760141431432752 │ 1.2.826.0.1.3680043.8.498.11389650391405144789117233891221888210 │ MG       │ DBT slices                    │ 1          │
+│ 9894340694 │ 1.2.826.0.1.3680043.8.498.10976157236759544945657408266559980502 │ 1.2.826.0.1.3680043.8.498.74608000754336619565503767283924990632 │ MR       │ LIVER-PELVIS/HASTE_AXIAL_P    │ 1          │
+│ 571403367  │ 1.2.826.0.1.3680043.8.498.43140369966073420105378776118739847239 │ 1.2.826.0.1.3680043.8.498.94202333078444804735974466471131425254 │ MG       │ DBT slices                    │ 1          │
+└────────────┴──────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────┴──────────┴───────────────────────────────┴────────────┘
+```
+
 ## Disclaimer
 
 This software is provided by the [Computational BioMedicine Laboratory (CBML), FORTH-ICS](https://www.ics.forth.gr/cbml/) under the terms of the European Union Public License (EUPL).  It is distributed in the hope that it will be useful, but **without any warranty** — not even the implied warranties of merchantability, fitness for a particular purpose, or non-infringement.

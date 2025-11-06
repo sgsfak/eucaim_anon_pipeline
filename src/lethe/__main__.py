@@ -109,13 +109,70 @@ def series_info(
             help="Input directory to read DICOM files from", show_default=True
         ),
     ] = INPUT_DIR,
+    grouped: Annotated[
+        bool,
+        typer.Option("--grouped/--ungrouped", help="Group series by description"),
+    ] = True,
     csv: Annotated[
         bool,
         typer.Option("--csv", help="Print series information in CSV format"),
     ] = False,
 ):
-    key = attrgetter("series_description")
-    series_info = sorted(series_information(input_dir), key=key)
+    series = series_information(input_dir)
+    if not grouped:
+        if csv:
+            import clevercsv
+
+            writer = clevercsv.writer(sys.stdout, "excel")
+
+            writer.writerow(
+                [
+                    "PatientID",
+                    "StudyUID",
+                    "SeriesUID",
+                    "Modality",
+                    "SeriesDescription",
+                    "ImageCount",
+                ]
+            )
+
+            for info in series:
+                writer.writerow(
+                    [
+                        info.patient_id,
+                        info.study_uid,
+                        info.series_uid,
+                        info.modality,
+                        info.series_description,
+                        f"{info.image_count}",
+                    ]
+                )
+            return
+
+        console = Console()
+
+        table = Table(title="Series information")
+        table.add_column("PatientID")
+        table.add_column("StudyUID")
+        table.add_column("SeriesUID")
+        table.add_column("Modality")
+        table.add_column("SeriesDescription")
+        table.add_column("ImageCount")
+
+        for info in series:
+            table.add_row(
+                info.patient_id,
+                info.study_uid,
+                info.series_uid,
+                info.modality,
+                info.series_description,
+                f"{info.image_count}",
+            )
+        console.print()
+        console.print(table)
+        return
+    key: attrgetter[str] = attrgetter("series_description")
+    series_info = sorted(series, key=key)
 
     rows: list[tuple[str]] = []
     total_count = 0
