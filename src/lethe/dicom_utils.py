@@ -1,5 +1,6 @@
 import os
 from collections import namedtuple
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Generator, Iterable
 
@@ -17,18 +18,15 @@ DcmFileInfo = namedtuple(
 )
 
 
-SeriesInfo = namedtuple(
-    "SeriesInfo",
-    [
-        "patient_id",
-        "study_uid",
-        "series_uid",
-        "series_description",
-        "study_description",
-        "modality",
-        "image_count",
-    ],
-)
+@dataclass(kw_only=True, eq=False)
+class SeriesInfo:
+    patient_id: str
+    study_uid: str
+    series_uid: str
+    series_description: str
+    study_description: str
+    modality: str
+    image_count: int
 
 
 def series_information(input_dir: Path) -> Iterable[SeriesInfo]:
