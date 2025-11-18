@@ -48,9 +48,9 @@ def series_information(input_dir: Path) -> Iterable[SeriesInfo]:
                     patient_id=dataset.PatientID,
                     study_uid=dataset.StudyInstanceUID,
                     series_uid=dataset.SeriesInstanceUID,
-                    series_description=dataset.SeriesDescription,
-                    study_description=dataset.StudyDescription,
-                    modality=dataset.Modality,
+                    series_description=dataset.get("SeriesDescription", ""),
+                    study_description=dataset.get("StudyDescription", ""),
+                    modality=dataset.get("Modality", ""),
                     image_count=1,
                 )
                 seen_so_far[key] = series_info
