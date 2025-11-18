@@ -17,6 +17,7 @@ dependencies = [
     "presidio-image-redactor>=0.0.57",
     "pydicom>=3.0.1",
     "python-stdnum>=2.1",
+    "sortedcontainers>=2.4.0",
     "tqdm>=4.67.1",
     "typer-slim>=0.19.2",
     "uuid7-standard>=1.1.0",

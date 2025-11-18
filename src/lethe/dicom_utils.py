@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Generator, Iterable
 
 from pydicom import FileDataset, dcmread
+from sortedcontainers import SortedDict
 
 DcmFileInfo = namedtuple(
     "DcmFileInfo",
@@ -30,7 +31,7 @@ class SeriesInfo:
 
 
 def series_information(input_dir: Path) -> Iterable[SeriesInfo]:
-    seen_so_far: dict[tuple[str, str, str], SeriesInfo] = {}
+    seen_so_far: SortedDict[tuple[str, str, str], SeriesInfo] = SortedDict()
     for root, dirs, files in os.walk(os.fspath(input_dir), topdown=True):
         for file in files:
             file_path = os.path.join(root, file)

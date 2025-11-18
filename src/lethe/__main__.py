@@ -121,7 +121,6 @@ def series_info(
     series_info_list = series_information(input_dir)
     # UnGrouped but sorted by PatientID:
     if not grouped:
-        series = sorted(series_info_list, key=attrgetter("patient_id"))
         if csv:
             import clevercsv
 
@@ -138,7 +137,7 @@ def series_info(
                 ]
             )
 
-            for info in series:
+            for info in series_info_list:
                 writer.writerow(
                     [
                         info.patient_id,
@@ -161,7 +160,7 @@ def series_info(
         table.add_column("SeriesDescription")
         table.add_column("ImageCount")
 
-        for info in series:
+        for info in series_info_list:
             table.add_row(
                 info.patient_id,
                 info.study_uid,
