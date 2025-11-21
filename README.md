@@ -83,6 +83,10 @@ which should return the following:
 * `-v` (or `--verbose`) will enable verbose mode, which will print more detailed information about the progress of the pipeline. In particular **the `secret key` used for the anonymization of the DICOM metadata will be printed to the console**.
 * `--secret <SECRET>` allows passing the secret key to be used for the anonymization of the DICOM metadata. This allows the consistent anonymization of a cohort of patients to be performed across multiple anonymization runs. You can get a "good" secret key either by running the pipeline once with the `--verbose` option or using the `utils secret` subcommand explained a [bit further below](#utilities).
 
+> [!IMPORTANT]
+> Passing all these parameters on the command line can be intimidating for the unitiative user. For this reason we provide also a [desktop application](lethe_ui) with a graphical user interface that allows the user to specify these parameters and get back the Docker command to run.
+
+
 #### PaddleOCR models
 PaddleOCR supports multiple different models for [text detection](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/text_detection.html), [text recognition](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/text_recognition.html), etc. By default in this Docker image we include the "lite" (mobile) models of PP-OCRv5: `PP-OCRv5_mobile_det` for text detection and `PP-OCRv5_mobile_rec` for text recognition as can be seen in the integrated [PaddleOCR.yaml](PaddleOCR.yaml) file. To further support additional models like the more complex and accurate "server" models, you can create your own YAML file (by copying the [PaddleOCR.yaml](PaddleOCR.yaml) file and modifying it) with the desired models and then running the `docker run` command with this new YAML file in the host machine mounted as `/app/PaddleOCR.yaml`, like so:
 
