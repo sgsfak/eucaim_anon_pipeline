@@ -36,10 +36,10 @@ jobs:
       - name: Wails Build
         uses: dAppServer/wails-build-action@main
         id: build
-        working-directory: ./lethe_ui
         with:
           build-name: ${{ matrix.build.name }}
           build-platform: ${{ matrix.build.platform }}
           package: true
           wails-build-webview2: "embed"
           go-version: '1.25.4'
+          app-working-directory: ./lethe_ui
