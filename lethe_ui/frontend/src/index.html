@@ -12,6 +12,24 @@
         <script src="assets/js/alpinejs" defer></script>
         <link rel="stylesheet" href="assets/css/pico.min.css" />
         <script src="main.js"></script>
+        <script
+            src="assets/js/copy-button.min.js"
+            data-selector="pre > code, blockquote"
+            defer
+        ></script>
+        <link href="assets/css/copy-button.min.css" rel="stylesheet" />
+        <style>
+            pre {
+                white-space: pre-wrap; /* Since CSS 2.1 */
+                white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+                white-space: -pre-wrap; /* Opera 4-6 */
+                white-space: -o-pre-wrap; /* Opera 7 */
+                word-wrap: break-word; /* Internet Explorer 5.5+ */
+            }
+            .copy-button {
+                display: inline-block;
+            }
+        </style>
     </head>
 
     <body id="app" class="app">
@@ -170,7 +188,7 @@
                 </details>
 
                 <div x-show="canStart">
-                    <code x-text="cmd"></code>
+                    <pre><code x-text="cmd" id="cmd"></code></pre>
                     <div @dispatch="console.log('CMD: ' + cmd)"></div>
                 </div>
                 <!--<button
