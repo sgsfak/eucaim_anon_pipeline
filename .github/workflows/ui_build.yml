@@ -43,3 +43,8 @@ jobs:
           wails-build-webview2: "embed"
           go-version: '1.25.4'
           app-working-directory: ${{ github.workspace }}/lethe_ui
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: build
+          path: ${{ github.workspace }}/lethe_ui
