@@ -38,7 +38,7 @@ jobs:
           submodules: recursive
 
       - name: Wails Build
-        uses: dAppServer/wails-build-action@v2.2
+        uses: dAppServer/wails-build-action@v2
         id: build
         with:
           build-name: ${{ matrix.build.name }}
