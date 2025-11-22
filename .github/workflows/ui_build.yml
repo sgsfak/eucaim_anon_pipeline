@@ -27,8 +27,7 @@ jobs:
             os: 'macos-latest'
 
     runs-on: ${{ matrix.build.os }}
-    defaults:
-      run:
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
