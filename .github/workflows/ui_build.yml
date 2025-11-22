@@ -42,4 +42,4 @@ jobs:
           package: true
           wails-build-webview2: "embed"
           go-version: '1.25.4'
-          app-working-directory: ./lethe_ui
+          app-working-directory: ${{ github.workspace }}/lethe_ui
