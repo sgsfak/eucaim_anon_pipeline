@@ -13,16 +13,16 @@ env:
 jobs:
   build:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         build:
-          - name: 'App'
+          - name: 'Lethe-UI'
             platform:  'linux/amd64'
             os: 'ubuntu-latest'
-          - name: 'App'
+          - name: 'Lethe-UI'
             platform:  'windows/amd64'
             os: 'windows-latest'
-          - name: 'App'
+          - name: 'Lethe-UI'
             platform:  'darwin/universal'
             os: 'macos-latest'
 
