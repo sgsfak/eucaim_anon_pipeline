@@ -13,8 +13,7 @@ env:
 jobs:
   build:
     strategy:
-    # Failure in one platform build won't impact the others
-      fail-fast: false
+      fail-fast: true
       matrix:
         build:
           - name: 'App'
@@ -30,8 +29,6 @@ jobs:
     runs-on: ${{ matrix.build.os }}
     defaults:
       run:
-        working-directory: lethe_ui
-    steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -40,9 +37,10 @@ jobs:
       - name: Wails Build
         uses: dAppServer/wails-build-action@main
         id: build
+        working-directory: lethe_ui
         with:
           build-name: ${{ matrix.build.name }}
           build-platform: ${{ matrix.build.platform }}
-          package: false
+          package: true
           wails-build-webview2: "embed"
           go-version: '1.25.4'
