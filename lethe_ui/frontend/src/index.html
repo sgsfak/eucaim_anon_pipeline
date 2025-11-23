@@ -1,0 +1,347 @@
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge, Chrome=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="icon"
+            type="image/png"
+            href="data:image/png;base64,iVBORw0KGgo="
+        />
+        <script src="assets/js/alpinejs" defer></script>
+        <link rel="stylesheet" href="assets/css/pico.min.css" />
+        <script src="main.js"></script>
+        <script
+            src="assets/js/copy-button.min.js"
+            data-selector="pre > code, blockquote"
+            defer
+        ></script>
+        <link href="assets/css/copy-button.min.css" rel="stylesheet" />
+        <style>
+            pre {
+                white-space: pre-wrap; /* Since CSS 2.1 */
+                white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+                white-space: -pre-wrap; /* Opera 4-6 */
+                white-space: -o-pre-wrap; /* Opera 7 */
+                word-wrap: break-word; /* Internet Explorer 5.5+ */
+            }
+            .copy-button {
+                display: inline-block;
+            }
+        </style>
+    </head>
+
+    <body id="app" class="app">
+        <main class="container">
+            <header style="--wails-draggable: drag">
+                <nav>
+                    <ul>
+                        <li><strong>FORTH-ICS, CBML</strong></li>
+                    </ul>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                    </ul>
+                </nav>
+                <hgroup>
+                    <h2>LETHE Anonymization Pipeline UI</h2>
+                    <p>Parameterize and run a new anonymization pipeline</p>
+                </hgroup>
+            </header>
+            <div
+                id="params"
+                class="input-box"
+                onsubmit=""
+                x-data="run_pipeline"
+            >
+                <fieldset role="group">
+                    <input
+                        x-model="site_id"
+                        placeholder="Site ID"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="off"
+                        autofocus
+                    />
+                </fieldset>
+                <fieldset role="group">
+                    <input
+                        x-model="input_dir"
+                        id="input_folder"
+                        placeholder="Input folder to read the DICOM files from"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="off"
+                    />
+                    <input
+                        @click="selectInputDir"
+                        type="submit"
+                        value="Select Input Folder"
+                    />
+                </fieldset>
+                <fieldset role="group">
+                    <input
+                        x-model="output_dir"
+                        id="output_folder"
+                        placeholder="Output folder to write the anonymized DICOM files to"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="off"
+                    />
+                    <input
+                        @click="selectOutputDir"
+                        type="submit"
+                        class="secondary"
+                        value="Select Output Folder"
+                    />
+                </fieldset>
+                <details class="contrast">
+                    <summary>Additional Parameters</summary>
+                    <fieldset class="grid">
+                        <div>
+                            <label>
+                                <input type="checkbox" x-model="ctp" />
+                                Run CTP
+                            </label>
+                            <label
+                                htmlFor="threads-number-input"
+                                for="threads-number-input"
+                            >
+                                Number of Threads:
+                                <input
+                                    id="threads-number-input"
+                                    type="number"
+                                    x-model="threads"
+                                    size="3"
+                                    min="4"
+                                    max="40"
+                                    data-tooltip="How many threads to use"
+                                />
+                            </label>
+                        </div>
+                        <fieldset>
+                            <legend>PII text redaction settings:</legend>
+                            <label htmlFor="ocr-no" for="ocr-no">
+                                <input
+                                    id="ocr-no"
+                                    type="radio"
+                                    name="ocr"
+                                    value=""
+                                    x-model="ocr"
+                                />
+                                No OCR
+                            </label>
+                            <label htmlFor="ocr-tesseract" for="ocr-tesseract">
+                                <input
+                                    id="ocr-tesseract"
+                                    type="radio"
+                                    name="ocr"
+                                    value="--ocr"
+                                    x-model="ocr"
+                                />
+                                Tesseract OCR
+                            </label>
+                            <label htmlFor="ocr-paddle" for="ocr-paddle">
+                                <input
+                                    id="ocr-paddle"
+                                    type="radio"
+                                    name="ocr"
+                                    value="--paddle-ocr"
+                                    x-model="ocr"
+                                />
+                                PaddleOCR
+                            </label>
+                        </fieldset>
+                    </fieldset>
+                    <!--
+                    <fieldset>
+                        <legend>OCR settings:</legend>
+                        <input
+                            id="ocr-no"
+                            type="radio"
+                            name="ocr"
+                            value=""
+                            x-model="ocr"
+                        />
+                        <label htmlFor="ocr-no" for="ocr-no"> No OCR </label>
+                        <input
+                            id="ocr-tesseract"
+                            type="radio"
+                            name="ocr"
+                            value="--ocr"
+                            x-model="ocr"
+                        />
+                        <label htmlFor="ocr-tesseract" for="ocr-tesseract">
+                            Tesseract
+                        </label>
+                        <input
+                            id="ocr-paddle"
+                            type="radio"
+                            name="ocr"
+                            value="--paddle-ocr"
+                            x-model="ocr"
+                        />
+                        <label htmlFor="ocr-paddle" for="ocr-paddle">
+                            PaddleOCR
+                        </label>
+                    </fieldset>-->
+                </details>
+
+                <div x-show="canStart">
+                    <pre><code x-text="cmd" id="cmd"></code></pre>
+                    <div @dispatch="console.log('CMD: ' + cmd)"></div>
+                </div>
+                <!--<button
+                    type="submit"
+                    data-target="modal-example"
+                    onclick="toggleModal(event)"
+                    x-show="canStart"
+                >
+                    Start Process
+                </button>-->
+                <button type="submit" x-show="canStart" @click="copyCommand">
+                    Copy Command
+                </button>
+                <!--<button aria-busy="true">Running…</button>-->
+            </div>
+
+            <script>
+                document.addEventListener("alpine:init", () => {
+                    Alpine.data("run_pipeline", () => ({
+                        site_id: "MY-SITE-ID",
+                        input_dir: "",
+                        output_dir: "",
+                        threads: "10",
+                        ctp: true,
+
+                        ocr: "",
+                        verbose: true,
+
+                        cmd() {
+                            const IMAGE =
+                                "harbor.eucaim.cancerimage.eu/ingestion-tools/lethe-dicom-anonymizer";
+                            const VERSION = "latest";
+                            const ctp = this.ctp ? "--ctp" : "--no-ctp";
+                            return `docker run -it -v "${this.input_dir}:/input" -v "${this.output_dir}:/output" ${IMAGE}:${VERSION} run ${this.ocr} ${ctp} --threads ${this.threads} ${this.site_id} ${this.verbose && "-v"}`;
+                        },
+                        canStart() {
+                            return (
+                                this.input_dir &&
+                                this.output_dir &&
+                                this.site_id
+                            );
+                        },
+                        selectInputDir() {
+                            const self = this;
+                            window.go.main.App.SelectDirectory()
+                                .then((result) => {
+                                    console.log(
+                                        `User selected directory: ${result}`,
+                                    );
+                                    if (result != "") {
+                                        self.input_dir = result;
+                                        // self.setCmd();
+                                    }
+                                })
+                                .catch((err) => {
+                                    console.log(err);
+                                });
+                        },
+                        selectOutputDir() {
+                            const self = this;
+                            window.go.main.App.SelectDirectory()
+                                .then((result) => {
+                                    console.log(
+                                        `User selected directory: ${result}`,
+                                    );
+                                    if (result != "") {
+                                        self.output_dir = result;
+                                        // self.setCmd();
+                                    }
+                                })
+                                .catch((err) => {
+                                    console.log(err);
+                                });
+                            console.log("finished");
+                        },
+
+                        copyCommand() {
+                            const text = this.cmd();
+
+                            if ("clipboard" in navigator) {
+                                navigator.clipboard
+                                    .writeText(text)
+                                    .then(() => {
+                                        console.log(
+                                            `Text "${text}" copied successfully`,
+                                        );
+                                    })
+                                    .catch((err) =>
+                                        console.error(err.name, err.message),
+                                    );
+                            } else {
+                                const textArea =
+                                    document.createElement("textarea");
+                                textArea.value = text;
+                                textArea.style.opacity = "0";
+                                document.body.appendChild(textArea);
+                                textArea.focus();
+                                textArea.select();
+                                try {
+                                    const success =
+                                        document.execCommand("copy");
+                                    console.log(
+                                        `Text copy was ${success ? "successful" : "unsuccessful"}.`,
+                                    );
+                                } catch (err) {
+                                    console.error(err);
+                                }
+                                document.body.removeChild(textArea);
+                            }
+                        },
+                    }));
+                });
+            </script>
+
+            <!-- Modal example -->
+            <dialog id="modal-example">
+                <article>
+                    <header>
+                        <button
+                            aria-label="Close"
+                            rel="prev"
+                            data-target="modal-example"
+                            onclick="toggleModal(event)"
+                        ></button>
+                        <h3>Run Pipeline</h3>
+                    </header>
+                    <p>
+                        You are about to run the anonymization pipeline. Are you
+                        sure you want to proceed?
+                    </p>
+                    <footer>
+                        <button
+                            role="button"
+                            class="secondary"
+                            data-target="modal-example"
+                            onclick="toggleModal(event)"
+                        >
+                            Cancel</button
+                        ><button
+                            autofocus
+                            data-target="modal-example"
+                            onclick="toggleModal(event)"
+                        >
+                            Confirm
+                        </button>
+                    </footer>
+                </article>
+            </dialog>
+            <!-- ./ Modal example -->
+        </main>
+        <footer>
+            <!--  -->
+        </footer>
+        <script src="assets/js/modal.js"></script>
+    </body>
+</html>

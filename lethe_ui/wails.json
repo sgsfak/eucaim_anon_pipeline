@@ -1,0 +1,16 @@
+{
+  "name": "Lethe-UI",
+  "outputfilename": "Lethe-UI",
+  "frontend:install": "",
+  "frontend:build": "",
+  "author": {
+    "name": "Stelios G. Sfakianakis",
+    "email": "ssfak@ics.forth.gr"
+  },
+  "info": {
+    "companyName": "FORTH-ICS",
+    "productName": "Lethe-UI",
+    "productVersion": "0.1.0",
+    "copyright": "2025 FORTH-ICS"
+  }
+}
